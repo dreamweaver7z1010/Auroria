@@ -1,0 +1,6 @@
+{
+  "name": "Core Academic Engine",
+  "description": "A high-fidelity Sci-Fi/Cyberpunk academic portfolio, phase-based rotation planner, and interactive mistake vault system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

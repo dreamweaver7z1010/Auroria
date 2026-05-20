@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --animate-scanline: scanline 8s linear infinite;
+  --animate-pulse-slow: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-cyber-glitch: cyber-glitch 1.5s steps(2, start) infinite;
+
+  @keyframes scanline {
+    0% {
+      transform: translateY(-100%);
+    }
+    100% {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 0.2;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  @keyframes cyber-glitch {
+    0%, 100% {
+      clip-path: inset(0 0 0 0);
+    }
+    10% {
+      clip-path: inset(10% -6px 85% 0);
+    }
+    20% {
+      clip-path: inset(80% -6px 5% 0);
+    }
+    30% {
+      clip-path: inset(40% -6px 45% 0);
+    }
+    40% {
+      clip-path: inset(15% -6px 80% 0);
+    }
+    50% {
+      clip-path: inset(70% -6px 20% 0);
+    }
+    60% {
+      clip-path: inset(5% -6px 90% 0);
+    }
+    70% {
+      clip-path: inset(55% -6px 35% 0);
+    }
+    80% {
+      clip-path: inset(30% -6px 60% 0);
+    }
+    90% {
+      clip-path: inset(90% -6px 2% 0);
+    }
+  }
+}
+
+/* Custom Utilities */
+@utility bg-cyber-grid {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@utility bg-glow-cyan {
+  background-color: rgba(0, 240, 255, 0.05);
+  border-color: rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+}
+
+@utility bg-glow-purple {
+  background-color: rgba(157, 0, 255, 0.05);
+  border-color: rgba(157, 0, 255, 0.3);
+  box-shadow: 0 0 15px rgba(157, 0, 255, 0.15);
+}
+
+@utility bg-glow-yellow {
+  background-color: rgba(255, 234, 0, 0.05);
+  border-color: rgba(255, 234, 0, 0.3);
+  box-shadow: 0 0 15px rgba(255, 234, 0, 0.15);
+}
+
+@utility bg-glow-green {
+  background-color: rgba(0, 255, 102, 0.05);
+  border-color: rgba(0, 255, 102, 0.3);
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.15);
+}
+
+@utility bg-glow-crimson {
+  background-color: rgba(255, 0, 85, 0.05);
+  border-color: rgba(255, 0, 85, 0.3);
+  box-shadow: 0 0 15px rgba(255, 0, 85, 0.15);
+}
+
+body {
+  background-color: #0A0A0F;
+  color: #E2E8F0;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0A0F;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1C1C28;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2D2D3E;
+}
+
+/* Glitch animation text layers */
+.glitch-text {
+  position: relative;
+}
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.glitch-text::before {
+  left: 2px;
+  text-shadow: -1px 0 #FF0055;
+  clip: rect(44px, 450px, 56px, 0);
+  animation: cyber-glitch 5s infinite linear alternate-reverse;
+}
+.glitch-text::after {
+  left: -2px;
+  text-shadow: -1px 0 #00F0FF;
+  clip: rect(85px, 450px, 140px, 0);
+  animation: cyber-glitch 3s infinite linear alternate-reverse;
+}
+

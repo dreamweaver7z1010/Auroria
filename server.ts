@@ -568,98 +568,16 @@ async function startServer() {
 
   // Authentication REST Endpoints
 
-  // User Sign-up
+  // User Sign-up (Direct registration without OTP check)
   app.post("/api/auth/signup", (req, res) => {
     try {
-      const { username, password } = req.body;
-      if (!username || !password || username.trim().length === 0 || password.length === 0) {
-        return res.status(400).json({ error: "Username and password criteria are required." });
+      const { name, username, password, email, emailPassword } = req.body;
+      if (!name || !username || !password || !email || !emailPassword) {
+        return res.status(400).json({ error: "All properties (Name, Username, Password, Email, Email's Password) are strictly required." });
       }
 
-      db = loadDB();
-      db.users = db.users || {};
-      const targetUser = username.trim().toLowerCase();
-
-      if (db.users[targetUser]) {
-        return res.status(400).json({ error: "Username already exists. Choose a different one." });
-      }
-
-      const salt = createSalt();
-      const passwordHash = hashPassword(password, salt);
-
-      db.users[targetUser] = {
-        username: targetUser,
-        salt,
-        passwordHash,
-        onboarded: false,
-        config: null,
-        testAnalytics: [],
-        mistakeVault: [],
-        currentOverrideState: null
-      };
-
-      saveDB(db);
-
-      // Generate Session Token
-      const sessionToken = crypto.randomBytes(32).toString("hex");
-      tokenStore.set(sessionToken, targetUser);
-
-      res.status(201).json({
-        success: true,
-        token: sessionToken,
-        user: {
-          username: targetUser,
-          onboarded: false
-        }
-      });
-    } catch (error: any) {
-      console.error("Sign-up error:", error);
-      res.status(500).json({ error: "Critical server error during sign-up registration" });
-    }
-  });
-
-  // Google Account - Check Email state
-  app.post("/api/auth/google/check-email", (req, res) => {
-    try {
-      const { email } = req.body;
-      if (!email || email.trim().length === 0) {
-        return res.status(400).json({ error: "Email parameter required." });
-      }
-
-      db = loadDB();
-      const searchEmail = email.trim().toLowerCase();
-      
-      // Look up if any user already has this google email
-      let associatedUser: any = null;
-      for (const username of Object.keys(db.users || {})) {
-        if (db.users[username].googleEmail === searchEmail) {
-          associatedUser = db.users[username];
-          break;
-        }
-      }
-
-      if (associatedUser) {
-        return res.json({
-          exists: true,
-          username: associatedUser.username
-        });
-      }
-
-      return res.json({
-        exists: false
-      });
-    } catch (error: any) {
-      console.error("Google verify check error:", error);
-      res.status(500).json({ error: "Server check fault during verification" });
-    }
-  });
-
-  // Google Account - Register with Username + Password
-  app.post("/api/auth/google/register", (req, res) => {
-    try {
-      const { email, username, password } = req.body;
-      if (!email || !username || !password || username.trim().length === 0 || password.length === 0) {
-        return res.status(400).json({ error: "All account parameters (email, username, password) are required." });
+      if (username.trim().length === 0 || password.length === 0 || email.trim().length === 0) {
+        return res.status(400).json({ error: "Supplied parameters must contain actual text contents." });
       }
 
       db = loadDB();
@@ -667,26 +585,29 @@ async function startServer() {
       const targetUser = username.trim().toLowerCase();
       const targetEmail = email.trim().toLowerCase();
 
-      // Ensure username is completely unique globally
+      // Rule: Username must be globally unique
       if (db.users[targetUser]) {
-        return res.status(400).json({ error: "Username already exists. Select a different distinct username identity." });
+        return res.status(400).json({ error: "Username is already taken by another student. Try a different unique identity!" });
       }
 
-      // Ensure email isn't already used
+      // Rule: A username can never be the same for different emails
       for (const u of Object.keys(db.users)) {
-        if (db.users[u].googleEmail === targetEmail) {
-          return res.status(400).json({ error: "This Google account already owns a registered study portal session." });
+        if (db.users[u].email?.toLowerCase() === targetEmail) {
+          return res.status(400).json({ error: "This email is already associated with an existing student profile." });
         }
       }
 
       const salt = createSalt();
       const passwordHash = hashPassword(password, salt);
+      const emailPasswordHash = hashPassword(emailPassword, salt);
 
       db.users[targetUser] = {
         username: targetUser,
-        googleEmail: targetEmail,
+        name: name.trim(),
+        email: targetEmail,
         salt,
         passwordHash,
+        emailPasswordHash,
         onboarded: false,
         config: null,
         testAnalytics: [],
@@ -696,71 +617,13 @@ async function startServer() {
 
       saveDB(db);
 
-      // Secure session link
-      const sessionToken = crypto.randomBytes(32).toString("hex");
-      tokenStore.set(sessionToken, targetUser);
-
       res.status(201).json({
         success: true,
-        token: sessionToken,
-        user: {
-          username: targetUser,
-          googleEmail: targetEmail,
-          onboarded: false
-        }
+        message: "Your profile has been registered successfully! Directing you to the login portal..."
       });
     } catch (error: any) {
-      console.error("Google sign up saving error:", error);
-      res.status(500).json({ error: "Could not persist Google linked account" });
-    }
-  });
-
-  // Google Account - Login with Email + Password verification
-  app.post("/api/auth/google/login", (req, res) => {
-    try {
-      const { email, password } = req.body;
-      if (!email || !password) {
-        return res.status(400).json({ error: "Missing login details parameter keys" });
-      }
-
-      db = loadDB();
-      const searchEmail = email.trim().toLowerCase();
-
-      // Find user
-      let matchedUser: any = null;
-      for (const username of Object.keys(db.users || {})) {
-        if (db.users[username].googleEmail === searchEmail) {
-          matchedUser = db.users[username];
-          break;
-        }
-      }
-
-      if (!matchedUser) {
-        return res.status(404).json({ error: "No student profile registered under this Google Account." });
-      }
-
-      // Check passcode
-      const hash = hashPassword(password, matchedUser.salt);
-      if (hash !== matchedUser.passwordHash) {
-        return res.status(401).json({ error: "Credential verification mismatch. Incorrect authorization code." });
-      }
-
-      // Create session
-      const sessionToken = crypto.randomBytes(32).toString("hex");
-      tokenStore.set(sessionToken, matchedUser.username);
-
-      res.json({
-        success: true,
-        token: sessionToken,
-        user: {
-          username: matchedUser.username,
-          googleEmail: matchedUser.googleEmail,
-          onboarded: matchedUser.onboarded
-        }
-      });
-    } catch (error: any) {
-      console.error("Google credentials login error:", error);
-      res.status(500).json({ error: "Credential matching fault" });
+      console.error("Direct signup operation crashed:", error);
+      res.status(500).json({ error: "Server error occurred during account creation." });
     }
   });
 

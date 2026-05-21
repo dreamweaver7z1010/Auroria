@@ -7,192 +7,75 @@ import {
 } from "lucide-react";
 import { OnboardingConfig, SubjectConfig, ComponentConfig, SubjectId } from "../types";
 
-export const DEFAULT_PREMIUM_SYLLABUS: Record<string, { groupA: { name: string; topics: string[] }; groupB: { name: string; topics: string[] } }> = {
-  "Chemistry": {
-    groupA: {
-      name: "Physical Chemistry",
-      topics: [
-        "Atoms, molecules, and stoichiometry",
-        "Atomic structure",
-        "Chemical bonding",
-        "States of matter",
-        "Chemical energetics",
-        "Electrochemistry",
-        "Equilibria",
-        "Reaction kinetics"
-      ]
-    },
-    groupB: {
-      name: "Inorganic & Organic Chemistry",
-      topics: [
-        "Periodic table trends",
-        "Group 2 elements",
-        "Group 17 (halogens)",
-        "Nitrogen and sulfur",
-        "Intro to organic chemistry",
-        "Hydrocarbons (alkanes + alkenes)",
-        "Halogenoalkanes",
-        "Alcohols",
-        "Organic reaction mechanisms"
-      ]
-    }
-  },
-  "Math": {
-    groupA: {
-      name: "Pure Mathematics 1 (P1)",
-      topics: [
-        "Quadratics",
-        "Functions",
-        "Coordinate geometry",
-        "Circular measure",
-        "Trigonometry",
-        "Series",
-        "Differentiation",
-        "Integration"
-      ]
-    },
-    groupB: {
-      name: "Statistics 1 & Mechanics 1",
-      topics: [
-        "Representation of data",
-        "Permutations & combinations",
-        "Probability",
-        "Discrete random variables",
-        "Normal distribution",
-        "Forces and equilibrium",
-        "Kinematics (motion)",
-        "Momentum",
-        "Newton’s laws",
-        "Energy, work, power"
-      ]
-    }
-  },
-  "Physics": {
-    groupA: {
-      name: "General Physics & Mechanics",
-      topics: [
-        "Physical quantities and units",
-        "Measurement techniques",
-        "Kinematics",
-        "Dynamics",
-        "Forces and equilibrium",
-        "Work, energy, power",
-        "Momentum"
-      ]
-    },
-    groupB: {
-      name: "Waves, Electricity & Modern Physics",
-      topics: [
-        "Waves",
-        "Superposition",
-        "Electric fields",
-        "Current electricity",
-        "Particle physics"
-      ]
-    }
-  },
-  "Computer Science": {
-    groupA: {
-      name: "Theory Fundamentals, Software & Logic",
-      topics: [
-        "Information representation",
-        "Communication and internet technologies",
-        "Hardware",
-        "Processor fundamentals",
-        "System software",
-        "Security",
-        "Ethics and legal issues"
-      ]
-    },
-    groupB: {
-      name: "Programming & Problem Solving",
-      topics: [
-        "Algorithm design",
-        "Pseudocode",
-        "Data structures",
-        "Programming concepts"
-      ]
-    }
-  },
-  "English": {
-    groupA: {
-      name: "Core Skills & Comprehension Skills",
-      topics: [
-        "Essay structure (intro, body, conclusion)",
-        "Argument building",
-        "Critical thinking",
-        "Evaluating arguments",
-        "Developing examples",
-        "Reading for meaning",
-        "Inference",
-        "Language analysis",
-        "Summarising",
-        "Persuasive writing"
-      ]
-    },
-    groupB: {
-      name: "Topical Content Bank & Practice Units",
-      topics: [
-        "Government & political systems",
-        "Human rights",
-        "Justice & law",
-        "Education",
-        "Globalisation",
-        "Medical ethics",
-        "Environment",
-        "Technology impact",
-        "AI & privacy",
-        "Media influence",
-        "Censorship",
-        "Literature & arts",
-        "Communication",
-        "Essay writing practice",
-        "Timed essays",
-        "Comprehension practice",
-        "Vocabulary building"
-      ]
-    }
-  }
-};
-
-export const PREMIUM_SUBJECT_PRESETS: SubjectConfig[] = [
+export const IGCSE_SUBJECT_PRESETS: SubjectConfig[] = [
   {
-    name: "Chemistry",
+    name: "Mathematics (0580)",
     components: [
-      { name: "Paper 1 (MCQ)", maxMarks: 40 },
-      { name: "Paper 2 (AS Structured)", maxMarks: 60 },
-      { name: "Paper 3 (Practical)", maxMarks: 40 }
+      { name: "Paper 2 (Extended)", maxMarks: 70 },
+      { name: "Paper 4 (Extended)", maxMarks: 130 }
     ],
-    totalMark: 140,
+    totalMark: 200,
     totalPaperTarget: 30,
     yearRangeStart: 2022,
     yearRangeEnd: 2026,
     series: ["Feb/March", "May/June", "Oct/Nov"],
     chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 1 (MCQ)", "Paper 2 (AS Structured)", "Paper 3 (Practical)"],
+    componentSequence: ["Paper 2 (Extended)", "Paper 4 (Extended)"],
     completedTopics: []
   },
   {
-    name: "Physics",
+    name: "Physics (0625)",
     components: [
-      { name: "Paper 1 (MCQ)", maxMarks: 40 },
-      { name: "Paper 2 (AS Structured)", maxMarks: 60 },
-      { name: "Paper 3 (Practical)", maxMarks: 40 }
+      { name: "Paper 2", maxMarks: 40 },
+      { name: "Paper 4", maxMarks: 80 },
+      { name: "Paper 6", maxMarks: 40 }
     ],
-    totalMark: 140,
+    totalMark: 160,
     totalPaperTarget: 30,
     yearRangeStart: 2022,
     yearRangeEnd: 2026,
     series: ["Feb/March", "May/June", "Oct/Nov"],
     chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 1 (MCQ)", "Paper 2 (AS Structured)", "Paper 3 (Practical)"],
+    componentSequence: ["Paper 2", "Paper 4", "Paper 6"],
     completedTopics: []
   },
   {
-    name: "Computer Science",
+    name: "Chemistry (0620)",
     components: [
-      { name: "Paper 1 (Theory Fundamentals)", maxMarks: 75 },
-      { name: "Paper 2 (Programming & Logic)", maxMarks: 75 }
+      { name: "Paper 2", maxMarks: 40 },
+      { name: "Paper 4", maxMarks: 80 },
+      { name: "Paper 6", maxMarks: 40 }
+    ],
+    totalMark: 160,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 2", "Paper 4", "Paper 6"],
+    completedTopics: []
+  },
+  {
+    name: "Biology (0610)",
+    components: [
+      { name: "Paper 2", maxMarks: 40 },
+      { name: "Paper 4", maxMarks: 80 },
+      { name: "Paper 6", maxMarks: 40 }
+    ],
+    totalMark: 160,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 2", "Paper 4", "Paper 6"],
+    completedTopics: []
+  },
+  {
+    name: "Computer Science (0478)",
+    components: [
+      { name: "Paper 1: Computer Systems", maxMarks: 75 },
+      { name: "Paper 2: Algorithms, Programming and Logic", maxMarks: 75 }
     ],
     totalMark: 150,
     totalPaperTarget: 30,
@@ -200,30 +83,186 @@ export const PREMIUM_SUBJECT_PRESETS: SubjectConfig[] = [
     yearRangeEnd: 2026,
     series: ["May/June", "Oct/Nov"],
     chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 1 (Theory Fundamentals)", "Paper 2 (Programming & Logic)"],
+    componentSequence: ["Paper 1: Computer Systems", "Paper 2: Algorithms, Programming and Logic"],
     completedTopics: []
   },
   {
-    name: "Math",
+    name: "English as a First Language (0500)",
     components: [
-      { name: "Paper 1 (Pure Mathematics 1)", maxMarks: 75 },
-      { name: "Paper 5 (Probability & Statistics 1)", maxMarks: 50 },
-      { name: "Paper 4 (Mechanics 1)", maxMarks: 50 }
+      { name: "Paper 1: Reading", maxMarks: 80 },
+      { name: "Paper 2: Directed Writing and Composition", maxMarks: 80 }
     ],
-    totalMark: 175,
+    totalMark: 160,
+    totalPaperTarget: 20,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: Reading", "Paper 2: Directed Writing and Composition"],
+    completedTopics: []
+  },
+  {
+    name: "English as a Second Language (0510 / 0511)",
+    components: [
+      { name: "Paper 1: Reading and Writing (Extended)", maxMarks: 60 },
+      { name: "Paper 2: Listening (Extended)", maxMarks: 40 },
+      { name: "Component 3/4: Speaking Test / Speaking Assessment", maxMarks: 30 }
+    ],
+    totalMark: 130,
+    totalPaperTarget: 20,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: Reading and Writing (Extended)", "Paper 2: Listening (Extended)", "Component 3/4: Speaking Test / Speaking Assessment"],
+    completedTopics: []
+  },
+  {
+    name: "Accounting (0452)",
+    components: [
+      { name: "Paper 1: Multiple Choice", maxMarks: 35 },
+      { name: "Paper 2: Structured Written Paper", maxMarks: 120 }
+    ],
+    totalMark: 155,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: Multiple Choice", "Paper 2: Structured Written Paper"],
+    completedTopics: []
+  },
+  {
+    name: "Economics (0455)",
+    components: [
+      { name: "Paper 1: Multiple Choice", maxMarks: 30 },
+      { name: "Paper 2: Structured Written Paper", maxMarks: 90 }
+    ],
+    totalMark: 120,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: Multiple Choice", "Paper 2: Structured Written Paper"],
+    completedTopics: []
+  },
+  {
+    name: "Business Studies (0450)",
+    components: [
+      { name: "Paper 1: Short Answer and Data Response", maxMarks: 80 },
+      { name: "Paper 2: Case Study", maxMarks: 80 }
+    ],
+    totalMark: 160,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: Short Answer and Data Response", "Paper 2: Case Study"],
+    completedTopics: []
+  },
+  {
+    name: "Psychology (0266)",
+    components: [
+      { name: "Paper 1: Key Studies and Methods", maxMarks: 60 },
+      { name: "Paper 2: Application and Context", maxMarks: 60 }
+    ],
+    totalMark: 120,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: Key Studies and Methods", "Paper 2: Application and Context"],
+    completedTopics: []
+  }
+];
+
+export const AS_SUBJECT_PRESETS: SubjectConfig[] = [
+  {
+    name: "Physics (9702)",
+    components: [
+      { name: "Paper 1: Multiple Choice", maxMarks: 40 },
+      { name: "Paper 2: AS Level Structured Questions", maxMarks: 60 },
+      { name: "Paper 3: Advanced Practical Skills", maxMarks: 40 }
+    ],
+    totalMark: 140,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: Multiple Choice", "Paper 2: AS Level Structured Questions", "Paper 3: Advanced Practical Skills"],
+    completedTopics: []
+  },
+  {
+    name: "Mathematics (9709)",
+    components: [
+      { name: "Paper 1: Pure Mathematics 1", maxMarks: 75 },
+      { name: "Paper 5: Probability & Statistics 1", maxMarks: 50 }
+    ],
+    totalMark: 125,
     totalPaperTarget: 35,
     yearRangeStart: 2022,
     yearRangeEnd: 2026,
     series: ["Feb/March", "May/June", "Oct/Nov"],
     chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 1 (Pure Mathematics 1)", "Paper 5 (Probability & Statistics 1)", "Paper 4 (Mechanics 1)"],
+    componentSequence: ["Paper 1: Pure Mathematics 1", "Paper 5: Probability & Statistics 1"],
     completedTopics: []
   },
   {
-    name: "English",
+    name: "Chemistry (9701)",
     components: [
-      { name: "Paper 1 (Essay)", maxMarks: 50 },
-      { name: "Paper 2 (Comprehension)", maxMarks: 50 }
+      { name: "Paper 1: Multiple Choice", maxMarks: 40 },
+      { name: "Paper 2: AS Level Structured Questions", maxMarks: 60 },
+      { name: "Paper 3: Advanced Practical Skills", maxMarks: 40 }
+    ],
+    totalMark: 140,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: Multiple Choice", "Paper 2: AS Level Structured Questions", "Paper 3: Advanced Practical Skills"],
+    completedTopics: []
+  },
+  {
+    name: "Biology (9700)",
+    components: [
+      { name: "Paper 1: Multiple Choice", maxMarks: 40 },
+      { name: "Paper 2: AS Level Structured Questions", maxMarks: 60 },
+      { name: "Paper 3: Advanced Practical Skills", maxMarks: 40 }
+    ],
+    totalMark: 140,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: Multiple Choice", "Paper 2: AS Level Structured Questions", "Paper 3: Advanced Practical Skills"],
+    completedTopics: []
+  },
+  {
+    name: "Computer Science (9618)",
+    components: [
+      { name: "Paper 1: Theory Fundamentals", maxMarks: 75 },
+      { name: "Paper 2: Fundamental Problem-solving and Programming Skills", maxMarks: 75 }
+    ],
+    totalMark: 150,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: Theory Fundamentals", "Paper 2: Fundamental Problem-solving and Programming Skills"],
+    completedTopics: []
+  },
+  {
+    name: "English General Paper (8021)",
+    components: [
+      { name: "Paper 1: Essay", maxMarks: 50 },
+      { name: "Paper 2: Comprehension", maxMarks: 50 }
     ],
     totalMark: 100,
     totalPaperTarget: 20,
@@ -231,10 +270,542 @@ export const PREMIUM_SUBJECT_PRESETS: SubjectConfig[] = [
     yearRangeEnd: 2026,
     series: ["May/June", "Oct/Nov"],
     chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 1 (Essay)", "Paper 2 (Comprehension)"],
+    componentSequence: ["Paper 1: Essay", "Paper 2: Comprehension"],
+    completedTopics: []
+  },
+  {
+    name: "Accounting (9706)",
+    components: [
+      { name: "Paper 1: Fundamentals of Accounting (Multiple Choice)", maxMarks: 30 },
+      { name: "Paper 2: Fundamentals of Accounting (Structured Questions)", maxMarks: 90 }
+    ],
+    totalMark: 120,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: Fundamentals of Accounting (Multiple Choice)", "Paper 2: Fundamentals of Accounting (Structured Questions)"],
+    completedTopics: []
+  },
+  {
+    name: "Economics (9708)",
+    components: [
+      { name: "Paper 1: AS Level Multiple Choice", maxMarks: 30 },
+      { name: "Paper 2: AS Level Data Response and Essays", maxMarks: 60 }
+    ],
+    totalMark: 90,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: AS Level Multiple Choice", "Paper 2: AS Level Data Response and Essays"],
+    completedTopics: []
+  },
+  {
+    name: "Business (9609)",
+    components: [
+      { name: "Paper 1: Business Concepts 1", maxMarks: 40 },
+      { name: "Paper 2: Business Concepts 2", maxMarks: 60 }
+    ],
+    totalMark: 100,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: Business Concepts 1", "Paper 2: Business Concepts 2"],
+    completedTopics: []
+  },
+  {
+    name: "Psychology (9990)",
+    components: [
+      { name: "Paper 1: Approaches, Issues and Debates", maxMarks: 60 },
+      { name: "Paper 2: Research Methods", maxMarks: 60 }
+    ],
+    totalMark: 120,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 1: Approaches, Issues and Debates", "Paper 2: Research Methods"],
     completedTopics: []
   }
 ];
+
+export const A_SUBJECT_PRESETS: SubjectConfig[] = [
+  {
+    name: "Physics (9702)",
+    components: [
+      { name: "Paper 4: A Level Structured Questions", maxMarks: 100 },
+      { name: "Paper 5: Planning, Analysis and Evaluation", maxMarks: 30 }
+    ],
+    totalMark: 130,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 4: A Level Structured Questions", "Paper 5: Planning, Analysis and Evaluation"],
+    completedTopics: []
+  },
+  {
+    name: "Mathematics (9709)",
+    components: [
+      { name: "Paper 3: Pure Mathematics 3", maxMarks: 75 },
+      { name: "Paper 6: Probability & Statistics 2", maxMarks: 50 }
+    ],
+    totalMark: 125,
+    totalPaperTarget: 35,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 3: Pure Mathematics 3", "Paper 6: Probability & Statistics 2"],
+    completedTopics: []
+  },
+  {
+    name: "Chemistry (9701)",
+    components: [
+      { name: "Paper 4: A Level Structured Questions", maxMarks: 100 },
+      { name: "Paper 5: Planning, Analysis and Evaluation", maxMarks: 30 }
+    ],
+    totalMark: 130,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 4: A Level Structured Questions", "Paper 5: Planning, Analysis and Evaluation"],
+    completedTopics: []
+  },
+  {
+    name: "Biology (9700)",
+    components: [
+      { name: "Paper 4: A Level Structured Questions", maxMarks: 100 },
+      { name: "Paper 5: Planning, Analysis and Evaluation", maxMarks: 30 }
+    ],
+    totalMark: 130,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 4: A Level Structured Questions", "Paper 5: Planning, Analysis and Evaluation"],
+    completedTopics: []
+  },
+  {
+    name: "Computer Science (9618)",
+    components: [
+      { name: "Paper 3: Advanced Theory", maxMarks: 75 },
+      { name: "Paper 4: Practical (A hands-on, onscreen programming exam)", maxMarks: 75 }
+    ],
+    totalMark: 150,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 3: Advanced Theory", "Paper 4: Practical (A hands-on, onscreen programming exam)"],
+    completedTopics: []
+  },
+  {
+    name: "English Language (9093)",
+    components: [
+      { name: "Paper 3: Text Analysis", maxMarks: 50 },
+      { name: "Paper 4: Language Topics", maxMarks: 50 }
+    ],
+    totalMark: 100,
+    totalPaperTarget: 20,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 3: Text Analysis", "Paper 4: Language Topics"],
+    completedTopics: []
+  },
+  {
+    name: "Accounting (9706)",
+    components: [
+      { name: "Paper 3: Financial Accounting", maxMarks: 75 },
+      { name: "Paper 4: Cost and Management Accounting", maxMarks: 50 }
+    ],
+    totalMark: 125,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 3: Financial Accounting", "Paper 4: Cost and Management Accounting"],
+    completedTopics: []
+  },
+  {
+    name: "Economics (9708)",
+    components: [
+      { name: "Paper 3: A Level Multiple Choice", maxMarks: 30 },
+      { name: "Paper 4: A Level Data Response and Essays", maxMarks: 60 }
+    ],
+    totalMark: 90,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 3: A Level Multiple Choice", "Paper 4: A Level Data Response and Essays"],
+    completedTopics: []
+  },
+  {
+    name: "Business (9609)",
+    components: [
+      { name: "Paper 3: Business Strategy", maxMarks: 60 },
+      { name: "Paper 4: Business Decision-Making", maxMarks: 40 }
+    ],
+    totalMark: 100,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["Feb/March", "May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 3: Business Strategy", "Paper 4: Business Decision-Making"],
+    completedTopics: []
+  },
+  {
+    name: "Psychology (9990)",
+    components: [
+      { name: "Paper 3: Specialist Options: Theory", maxMarks: 60 },
+      { name: "Paper 4: Specialist Options: Case Studies", maxMarks: 60 }
+    ],
+    totalMark: 120,
+    totalPaperTarget: 30,
+    yearRangeStart: 2022,
+    yearRangeEnd: 2026,
+    series: ["May/June", "Oct/Nov"],
+    chronologicalRule: [2025, 2026, 2024],
+    componentSequence: ["Paper 3: Specialist Options: Theory", "Paper 4: Specialist Options: Case Studies"],
+    completedTopics: []
+  }
+];
+
+export const IGCSE_SYLLABUS_PRESETS: Record<string, { groupA: { name: string; topics: string[] }; groupB: { name: string; topics: string[] } }> = {
+  "Mathematics (0580)": {
+    groupA: {
+      name: "Core Number & Algebra",
+      topics: ["Number", "Algebra and graphs", "Coordinate geometry"]
+    },
+    groupB: {
+      name: "Geometry, Mensuration & Statistics",
+      topics: ["Geometry", "Mensuration", "Trigonometry", "Vectors & transformations", "Probability", "Statistics"]
+    }
+  },
+  "Physics (0625)": {
+    groupA: {
+      name: "Motion, Forces & Energy",
+      topics: ["Physical quantities & measurement", "Motion", "Forces, density and solids", "Momentum", "Energy, work, power", "Pressure"]
+    },
+    groupB: {
+      name: "Thermal, Waves, Electricity & Space",
+      topics: ["Thermal physics", "Waves", "Light", "Electromagnetic spectrum", "Sound", "Electricity & magnetism", "Space physics"]
+    }
+  },
+  "Chemistry (0620)": {
+    groupA: {
+      name: "Atoms, Bonding & Stoichiometry",
+      topics: ["States of matter", "Atoms, elements & compounds", "Stoichiometry", "Electrochemistry", "Chemical energetics"]
+    },
+    groupB: {
+      name: "Reactions & Organic Chemistry",
+      topics: ["Chemical reactions", "Acids, bases & salts", "The Periodic Table", "Metals", "Chemistry of the environment", "Organic chemistry", "Experimental techniques"]
+    }
+  },
+  "Biology (0610)": {
+    groupA: {
+      name: "Cells, Organisms & Nutrition",
+      topics: ["Characteristics & classification", "Organisation of the organism", "Movement into/out of cells", "Biological molecules", "Enzymes", "Plant nutrition", "Human nutrition"]
+    },
+    groupB: {
+      name: "Physiology, Genetics & Ecology",
+      topics: ["Transport in plants", "Transport in animals", "Diseases and immunity", "Gas exchange", "Respiration", "Excretion", "Coordination", "Reproduction", "Inheritance", "Variation", "Ecology"]
+    }
+  },
+  "Computer Science (0478)": {
+    groupA: {
+      name: "Computer Systems",
+      topics: ["Data representation", "Data transmission", "Hardware", "System software", "The internet", "Automated & emerging tech"]
+    },
+    groupB: {
+      name: "Algorithms & Programming",
+      topics: ["Algorithm design & problem-solving", "Programming paradigm", "Databases", "Boolean logic"]
+    }
+  },
+  "English as a First Language (0500)": {
+    groupA: {
+      name: "Reading Foundations",
+      topics: ["Reading comprehension", "Summary writing", "Explicit & implicit meanings", "Writer's effect"]
+    },
+    groupB: {
+      name: "Writing & Composition",
+      topics: ["Directed writing", "Persuasive prose", "Narrative writing", "Descriptive essays"]
+    }
+  },
+  "English as a Second Language (0510 / 0511)": {
+    groupA: {
+      name: "Reading & Writing Skills",
+      topics: ["Skimming and scanning", "Note-taking", "Short answer questions", "Extended articles writing"]
+    },
+    groupB: {
+      name: "Listening & Oral Skills",
+      topics: ["Listening comprehension", "Speaking assessment prompts", "Oral debates", "Pronunciation"]
+    }
+  },
+  "Accounting (0452)": {
+    groupA: {
+      name: "Financial Accounting Bases",
+      topics: ["The fundamentals of accounting", "Sources and recording of data", "Verification of accounting records"]
+    },
+    groupB: {
+      name: "Statements & Principles",
+      topics: ["Accounting procedures", "Preparation of financial statements", "Analysis & interpretation", "Accounting principles"]
+    }
+  },
+  "Economics (0455)": {
+    groupA: {
+      name: "Microeconomics & Markets",
+      topics: ["The basic economic problem", "The allocation of resources", "Microeconomic decision makers"]
+    },
+    groupB: {
+      name: "Macroeconomics & Trade",
+      topics: ["Government & the macroeconomy", "Economic development", "International trade and globalisation"]
+    }
+  },
+  "Business Studies (0450)": {
+    groupA: {
+      name: "Business & Marketing Operations",
+      topics: ["Understanding business activity", "People in business", "Marketing & brand dynamics"]
+    },
+    groupB: {
+      name: "Finance, Management & External Influences",
+      topics: ["Operations management", "Financial information and decisions", "External influences on activity"]
+    }
+  },
+  "Psychology (0266)": {
+    groupA: {
+      name: "Key Social & Cognitive",
+      topics: ["Social influence", "Memory drills", "Attention spans", "Perception limits"]
+    },
+    groupB: {
+      name: "Development & Methods",
+      topics: ["Research methodology", "Biological structures", "Brain scanning diagnostics", "Psychological development"]
+    }
+  }
+};
+
+export const AS_SYLLABUS_PRESETS: Record<string, { groupA: { name: string; topics: string[] }; groupB: { name: string; topics: string[] } }> = {
+  "Physics (9702)": {
+    groupA: {
+      name: "Physical Quantities & Mechanics",
+      topics: ["Physical quantities & units", "Kinematics", "Dynamics", "Forces, density and pressure", "Work, energy, power", "Deformation of solids"]
+    },
+    groupB: {
+      name: "Waves, Electricity & Nuclear",
+      topics: ["Waves", "Superposition", "Current electricity", "D.C. circuits", "Particle physics & nuclear structure"]
+    }
+  },
+  "Mathematics (9709)": {
+    groupA: {
+      name: "Pure Mathematics 1 (P1)",
+      topics: ["Quadratics", "Functions", "Coordinate geometry", "Circular measure", "Trigonometry", "Series", "Differentiation", "Integration"]
+    },
+    groupB: {
+      name: "Probability & Statistics 1 (S1)",
+      topics: ["Representation of data", "Permutations & combinations", "Probability", "Discrete random variables", "Normal distribution"]
+    }
+  },
+  "Chemistry (9701)": {
+    groupA: {
+      name: "Physical Chemistry Foundations",
+      topics: ["Atoms, molecules & stoichiometry", "Atomic structure", "Chemical bonding", "States of matter", "Chemical energetics", "Electrochemistry", "Equilibria", "Reaction kinetics"]
+    },
+    groupB: {
+      name: "Inorganic & Organic Chemistry",
+      topics: ["The Periodic Table", "Group 2", "Group 17", "Nitrogen and sulfur", "Organic chemistry intro", "Hydrocarbons", "Halogenoalkanes", "Alcohols", "Carbonyl compounds", "Carboxylic acids"]
+    }
+  },
+  "Biology (9700)": {
+    groupA: {
+      name: "Cell Structure & Biochemistry",
+      topics: ["Cell structure and design", "Biological molecules", "Enzymes", "Cell membranes and transport", "Mitotic cell cycle", "Nucleic acids & protein synthesis"]
+    },
+    groupB: {
+      name: "Physiology & Pathogens",
+      topics: ["Transport in plants", "Transport in mammals", "Gas exchange and smoking", "Infectious diseases", "Immunity mechanisms"]
+    }
+  },
+  "Computer Science (9618)": {
+    groupA: {
+      name: "Theory Fundamentals",
+      topics: ["Information representation", "Communication & web", "Hardware", "Processor fundamentals", "System software", "Security", "Ethics"]
+    },
+    groupB: {
+      name: "Fundamental Problem-solving & Coding",
+      topics: ["Algorithm design", "Data structures", "Programming concepts", "Software engineering models"]
+    }
+  },
+  "English General Paper (8021)": {
+    groupA: {
+      name: "Core Essay Construction",
+      topics: ["Deconstructing questions", "Essay structuring", "Developing examples", "Style & persuasive tone"]
+    },
+    groupB: {
+      name: "Comprehension & Analysis",
+      topics: ["Analyzing texts", "Interpreting written data", "Linguistic devices", "Summary writing rules"]
+    }
+  },
+  "Accounting (9706)": {
+    groupA: {
+      name: "Fundamentals of Financial Accounting",
+      topics: ["Double-entry systems", "Verification controls", "Sole trader statements", "Partnership accounts"]
+    },
+    groupB: {
+      name: "Fundamentals of Cost Accounting",
+      topics: ["Material cost & logistics", "Labor cost strategies", "Absorption costing", "Marginal costing rules"]
+    }
+  },
+  "Economics (9708)": {
+    groupA: {
+      name: "Microeconomic Fundamentals",
+      topics: ["Basic economic ideas", "Demand & supply", "Market equilibrium", "Price elasticity"]
+    },
+    groupB: {
+      name: "Macroeconomic Policy",
+      topics: ["Aggregate demand & supply", "Economic integration", "Balance of payments", "Inflation indices"]
+    }
+  },
+  "Business (9609)": {
+    groupA: {
+      name: "Business Activity & People",
+      topics: ["Business and its environment", "People in business", "Marketing paradigms"]
+    },
+    groupB: {
+      name: "Operations & Finance Concepts",
+      topics: ["Operations management", "Finance and accounting", "Budgets and cashflows"]
+    }
+  },
+  "Psychology (9990)": {
+    groupA: {
+      name: "Core Biological & Cognitive Studies",
+      topics: ["Biological approach in social settings", "Cognitive memory sweeps", "Learning approach models"]
+    },
+    groupB: {
+      name: "Research Methodology",
+      topics: ["Experimental designs", "Self-reports & surveys", "Case study approaches", "Ethics guidelines"]
+    }
+  }
+};
+
+export const A_SYLLABUS_PRESETS: Record<string, { groupA: { name: string; topics: string[] }; groupB: { name: string; topics: string[] } }> = {
+  "Physics (9702)": {
+    groupA: {
+      name: "Advanced Mechanics & Thermal",
+      topics: ["Circular motion", "Gravitational fields", "Temperature & ideal gas", "Thermodynamics", "Oscillations & frequency"]
+    },
+    groupB: {
+      name: "Electromagnetism, Quantum & Medical",
+      topics: ["Electric fields", "Capacitance", "Magnetic fields", "Electromagnetic induction", "Quantum physics", "Nuclear & medical physics"]
+    }
+  },
+  "Mathematics (9709)": {
+    groupA: {
+      name: "Pure Mathematics 3 (P3)",
+      topics: ["Algebraic methods", "Logarithmic curves", "Trigonometry rules", "Calculus integration", "Numerical solutions", "Complex numbers"]
+    },
+    groupB: {
+      name: "Probability & Statistics 2 (S2)",
+      topics: ["Poisson distribution", "Linear combinations", "Continuous random variables", "Sampling and estimation", "Hypothesis testing"]
+    }
+  },
+  "Chemistry (9701)": {
+    groupA: {
+      name: "Advanced Physical Chemistry",
+      topics: ["Chemical energetics A2", "Advanced electrochemistry", "Acid-base equilibria", "Kinetics & transition elements", "Transition colors"]
+    },
+    groupB: {
+      name: "Advanced Inorganic & Organic",
+      topics: ["Arenes and substitution", "Halogen compounds", "Hydroxy compounds", "Nitrogen compounds", "Polymerisation", "Analytical synthesis"]
+    }
+  },
+  "Biology (9700)": {
+    groupA: {
+      name: "Energy & Coordination",
+      topics: ["Energy & respiration", "Photosynthesis systems", "Homeostasis regulation", "Co-ordination in plants/animals"]
+    },
+    groupB: {
+      name: "Inheritance, Ecosystems & Tech",
+      topics: ["Inheritance genetics", "Selection and evolution", "Classification, biodiversity", "Genetic technologies"]
+    }
+  },
+  "Computer Science (9618)": {
+    groupA: {
+      name: "Advanced Theory Concepts",
+      topics: ["Data representation advanced", "Communication & networks", "System software deep-dive", "AI & cloud security"]
+    },
+    groupB: {
+      name: "Practical Programming (Paper 4)",
+      topics: ["Low-level assembly", "Declarative paradigms", "Advanced recursion, OOP", "Project diagnostics"]
+    }
+  },
+  "English Language (9093)": {
+    groupA: {
+      name: "Text Analysis Skills",
+      topics: ["Audience and text purpose", "Linguistic devices", "Comparative prose analysis", "Coherence patterns"]
+    },
+    groupB: {
+      name: "Language Topics Deep-Dive",
+      topics: ["Language acquisition stages", "Language change timeline", "Global English spread", "Language & self identity"]
+    }
+  },
+  "Accounting (9706)": {
+    groupA: {
+      name: "Advanced Financial Accounting",
+      topics: ["Preparation of complex statements", "Cash flow diagnostics", "Business transitions", "Consolidations"]
+    },
+    groupB: {
+      name: "Advanced Cost & Management",
+      topics: ["Activity-based costing", "Standard variance analysis", "Capital investment appraisal", "Joint products costing"]
+    }
+  },
+  "Economics (9708)": {
+    groupA: {
+      name: "Advanced Microeconomics",
+      topics: ["Consumer behavior curves", "Production & advanced cost", "Market structures & oligopoly", "Micro-market failures"]
+    },
+    groupB: {
+      name: "Advanced Macroeconomics",
+      topics: ["Economic growth models", "Unemployment indices", "Macro stability goals", "International financial flows"]
+    }
+  },
+  "Business (9609)": {
+    groupA: {
+      name: "Strategic Management Models",
+      topics: ["Understanding strategy", "Strategic choices", "Implementation guidelines", "Risk and control matrices"]
+    },
+    groupB: {
+      name: "Decision-Making Matrices",
+      topics: ["Strategic analysis tools", "Investment appraisals", "Critical path project planning", "Risk analysis"]
+    }
+  },
+  "Psychology (9990)": {
+    groupA: {
+      name: "Specialist Options: Theory",
+      topics: ["Clinical mental health theories", "Consumer behavioral theories", "Health psychology theories", "Organizational psychological models"]
+    },
+    groupB: {
+      name: "Specialist Options: Case Studies",
+      topics: ["Clinical therapeutic sweeps", "Consumer choices experiments", "Medical obedience trials", "Workplace productivity groups"]
+    }
+  }
+};
 
 export function parseMarkdownSyllabus(text: string): Record<string, { groupA: { name: string; topics: string[] }; groupB: { name: string; topics: string[] } }> {
   const lines = text.split("\n");
@@ -300,12 +871,12 @@ export default function OnboardingWizard({ onComplete, username }: OnboardingWiz
   const [step, setStep] = useState(1);
   const [board, setBoard] = useState<"CBSE" | "CIE">("CIE");
   const [subVariant, setSubVariant] = useState<any>("AS LEVEL");
-  const [customSyllabus, setCustomSyllabus] = useState<Record<string, { groupA: { name: string; topics: string[] }; groupB: { name: string; topics: string[] } }>>(DEFAULT_PREMIUM_SYLLABUS);
+  const [customSyllabus, setCustomSyllabus] = useState<Record<string, { groupA: { name: string; topics: string[] }; groupB: { name: string; topics: string[] } }>>(AS_SYLLABUS_PRESETS);
   const [rawSyllabusInput, setRawSyllabusInput] = useState("");
   const [showSyllabusImporter, setShowSyllabusImporter] = useState(false);
 
   // Subject Configurations Array initiated with premium preset values instead of empty/minimal ones!
-  const [subjects, setSubjects] = useState<SubjectConfig[]>(PREMIUM_SUBJECT_PRESETS);
+  const [subjects, setSubjects] = useState<SubjectConfig[]>(AS_SUBJECT_PRESETS);
 
   // Timelines
   const [schoolStartDate, setSchoolStartDate] = useState("2026-06-01");
@@ -485,7 +1056,19 @@ export default function OnboardingWizard({ onComplete, username }: OnboardingWiz
                     {["IGCSE", "AS LEVEL", "A LEVEL"].map(v => (
                       <button
                         key={v}
-                        onClick={() => setSubVariant(v)}
+                        onClick={() => {
+                          setSubVariant(v);
+                          if (v === "IGCSE") {
+                            setSubjects(IGCSE_SUBJECT_PRESETS);
+                            setCustomSyllabus(IGCSE_SYLLABUS_PRESETS);
+                          } else if (v === "AS LEVEL") {
+                            setSubjects(AS_SUBJECT_PRESETS);
+                            setCustomSyllabus(AS_SYLLABUS_PRESETS);
+                          } else if (v === "A LEVEL") {
+                            setSubjects(A_SUBJECT_PRESETS);
+                            setCustomSyllabus(A_SYLLABUS_PRESETS);
+                          }
+                        }}
                         className={`px-3 py-1.5 rounded text-xs transition-all uppercase border ${
                           subVariant === v 
                             ? "bg-[#00F0FF]/15 border-[#00F0FF] text-[#00F0FF] font-black" 
@@ -529,10 +1112,10 @@ export default function OnboardingWizard({ onComplete, username }: OnboardingWiz
                     <div>
                       <h3 className="text-white font-bold text-xs uppercase tracking-wide flex items-center gap-1.5">
                         <Flame className="text-amber-400 fill-amber-400" size={14} /> 
-                        PRE-LOAD CIE AS-LEVEL COURSE & STUDY UNITS PRESET
+                        PRE-LOAD CIE {subVariant} COURSE & STUDY UNITS PRESET
                       </h3>
                       <p className="text-[11px] text-slate-400 mt-0.5 leading-normal">
-                        Instantly populates all 5 core subjects (Chemistry, Physics, Computer Science, Math, English) mapped exactly with Cambridge AS-Level code components and grouped chapters.
+                        Instantly populates all standard {subVariant} subjects mapped exactly with Cambridge code components and grouped syllabus directories.
                       </p>
                     </div>
 
@@ -540,13 +1123,23 @@ export default function OnboardingWizard({ onComplete, username }: OnboardingWiz
                       <button
                         type="button"
                         onClick={() => {
-                          setSubjects(PREMIUM_SUBJECT_PRESETS);
-                          setCustomSyllabus(DEFAULT_PREMIUM_SYLLABUS);
-                          alert("Premium CIE AS-Level Study Units and components successfully initialized! Proceed below to customize paper weights or add targets.");
+                          if (subVariant === "IGCSE") {
+                            setSubjects(IGCSE_SUBJECT_PRESETS);
+                            setCustomSyllabus(IGCSE_SYLLABUS_PRESETS);
+                            alert("Premium CIE IGCSE Study Units and components successfully initialized! Proceed below to customize weights or add targets.");
+                          } else if (subVariant === "A LEVEL") {
+                            setSubjects(A_SUBJECT_PRESETS);
+                            setCustomSyllabus(A_SYLLABUS_PRESETS);
+                            alert("Premium CIE A-Level Study Units and components successfully initialized! Proceed below to customize weights or add targets.");
+                          } else {
+                            setSubjects(AS_SUBJECT_PRESETS);
+                            setCustomSyllabus(AS_SYLLABUS_PRESETS);
+                            alert("Premium CIE AS-Level Study Units and components successfully initialized! Proceed below to customize weights or add targets.");
+                          }
                         }}
                         className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 border border-purple-400/40 text-[10.5px] font-black uppercase rounded-lg flex items-center gap-1.5 transition-all text-white"
                       >
-                        <Star size={12} className="fill-amber-300 stroke-amber-300" /> Apply Full AS-Level Preset
+                        <Star size={12} className="fill-amber-300 stroke-amber-300" /> Apply Full {subVariant} Preset
                       </button>
 
                       <button

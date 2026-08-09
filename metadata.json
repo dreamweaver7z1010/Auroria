@@ -1,6 +1,6 @@
 {
-  "name": "Core Academic Engine",
-  "description": "A high-fidelity Sci-Fi/Cyberpunk academic portfolio, phase-based rotation planner, and interactive mistake vault system.",
+  "name": "Saber Study Portal",
+  "description": "FOR STUDENTS, BY STUDENTS — High-utility academic grid and CIE AS & A Level preparation portal.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

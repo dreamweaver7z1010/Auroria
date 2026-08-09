@@ -5,10 +5,11 @@ import {
   CheckCircle, ShieldCheck, ChevronDown, ChevronUp, 
   Plus, Terminal, X, Archive, AlertTriangle, Eye 
 } from "lucide-react";
-import { TestAnalytics, MistakeVault, SubjectId } from "../types";
+import { TestAnalytics, MistakeVault, SubjectId, SubjectConfig } from "../types";
 import { getSubjectAccent } from "./CyberGlowStyles";
 
 interface AnalyticsHUDProps {
+  userSubjects?: SubjectConfig[];
   tests: TestAnalytics[];
   mistakes: MistakeVault[];
   onAddTest: (test: Omit<TestAnalytics, "id" | "percentage" | "date">) => Promise<void>;
@@ -17,6 +18,7 @@ interface AnalyticsHUDProps {
 }
 
 export default function AnalyticsHUD({ 
+  userSubjects = [],
   tests, 
   mistakes, 
   onAddTest, 
@@ -39,7 +41,7 @@ export default function AnalyticsHUD({
   const [gritLogText, setGritLogText] = useState("");
 
   const [showMistakeForm, setShowMistakeForm] = useState(false);
-  const [mSubject, setMSubject] = useState<SubjectId>("Math");
+  const [mSubject, setMSubject] = useState<SubjectId>(userSubjects[0]?.name || "General");
   const [mDesc, setMDesc] = useState("");
   const [mWrong, setMWrong] = useState("");
   const [mCorrect, setMCorrect] = useState("");
@@ -50,49 +52,29 @@ export default function AnalyticsHUD({
 
   // Subject performance calculation for Loading bars
   const subjectAverages = useMemo(() => {
-    // Standard subject list
-    const subjectsMap: Record<SubjectId, { sum: number; count: number }> = {
-      "Chemistry": { sum: 0, count: 0 },
-      "Physics": { sum: 0, count: 0 },
-      "Math": { sum: 0, count: 0 },
-      "Computer Science": { sum: 0, count: 0 },
-      "English": { sum: 0, count: 0 }
-    };
+    const enrolledNames = (userSubjects && userSubjects.length > 0)
+      ? userSubjects.map(s => s.name)
+      : Array.from(new Set(tests.map(t => t.subject || "General")));
 
-    // Calculate sum of percentages based on names
-    tests.forEach((t) => {
-      const name = t.name.toLowerCase();
-      if (name.includes("chem")) {
-        subjectsMap["Chemistry"].sum += t.percentage;
-        subjectsMap["Chemistry"].count++;
-      } else if (name.includes("phys")) {
-        subjectsMap["Physics"].sum += t.percentage;
-        subjectsMap["Physics"].count++;
-      } else if (name.includes("math") || name.includes("calc")) {
-        subjectsMap["Math"].sum += t.percentage;
-        subjectsMap["Math"].count++;
-      } else if (name.includes("computer") || name.includes("cs")) {
-        subjectsMap["Computer Science"].sum += t.percentage;
-        subjectsMap["Computer Science"].count++;
-      } else if (name.includes("eng") || name.includes("liter")) {
-        subjectsMap["English"].sum += t.percentage;
-        subjectsMap["English"].count++;
-      }
-    });
+    if (enrolledNames.length === 0) enrolledNames.push("General");
 
-    // Generate average or default to benchmark
-    return Object.keys(subjectsMap).map((key) => {
-      const sId = key as SubjectId;
-      const data = subjectsMap[sId];
-      // Default seeds if none found to avoid empty bars
-      const benchmarkDefault = sId === "Math" ? 95 : sId === "Chemistry" ? 67 : sId === "Physics" ? 78 : sId === "Computer Science" ? 91 : 76;
-      const averagePerc = data.count > 0 ? parseFloat((data.sum / data.count).toFixed(1)) : benchmarkDefault;
+    return enrolledNames.map(sName => {
+      const matchedTests = tests.filter(t => 
+        (t.subject && t.subject.toLowerCase() === sName.toLowerCase()) ||
+        t.name.toLowerCase().includes(sName.toLowerCase())
+      );
+      const totalObtained = matchedTests.reduce((sum, t) => sum + t.rawScore, 0);
+      const totalMax = matchedTests.reduce((sum, t) => sum + t.totalMaxPoints, 0);
+      const percentage = totalMax > 0 
+        ? parseFloat(((totalObtained / totalMax) * 100).toFixed(1)) 
+        : 80;
+
       return {
-        subject: sId,
-        percentage: averagePerc
+        subject: sName,
+        percentage
       };
     });
-  }, [tests]);
+  }, [tests, userSubjects]);
 
   const toggleMistakeExpand = (id: string) => {
     setExpandedMistakeIds(prev => ({ ...prev, [id]: !prev[id] }));

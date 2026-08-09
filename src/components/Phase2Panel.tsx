@@ -6,7 +6,7 @@ import { SubjectConfig, SubjectId } from "../types";
 
 interface Phase2PanelProps {
   userSubjects: SubjectConfig[];
-  onToggleTopic: (subject: SubjectId, topic: string, completed: boolean) => Promise<void>;
+  onToggleTopic: (subject: SubjectId, topic: string, completed: boolean, phaseId?: number) => Promise<void>;
   loadingToggle: boolean;
   customSyllabus?: Record<string, any>;
   onSaveCustomSyllabus?: (subject: string, syllabusData: any) => Promise<void>;
@@ -19,12 +19,24 @@ export default function Phase2Panel({
   customSyllabus,
   onSaveCustomSyllabus
 }: Phase2PanelProps) {
+  const names = userSubjects.map(s => s.name);
+  const count = names.length;
+
+  const getSubCombo = (offset: number) => {
+    if (count === 0) return "No Enrolled Subjects";
+    if (count === 1) return names[0];
+    const first = names[offset % count];
+    const second = names[(offset + 1) % count];
+    const third = names[(offset + 2) % count];
+    return count >= 3 ? `${first} + ${second} + ${third}` : `${first} + ${second}`;
+  };
+
   const rotationDays = [
-    { day: "Day 1", subjects: "Chemistry + Mathematics + English", color: "border-[#00F0FF]/25 text-[#00F0FF]" },
-    { day: "Day 2", subjects: "Physics + Computer Science + Mathematics", color: "border-purple-500/25 text-purple-400" },
-    { day: "Day 3", subjects: "Chemistry + Physics + English", color: "border-[#00FF66]/25 text-[#00FF66]" },
-    { day: "Day 4", subjects: "Computer Science + Mathematics + English", color: "border-pink-500/25 text-pink-400" },
-    { day: "Day 5", subjects: "Chemistry + Computer Science + Physics", color: "border-[#FFEA00]/25 text-[#FFEA00]" }
+    { day: "Day 1", subjects: getSubCombo(0), color: "border-[#00F0FF]/25 text-[#00F0FF]" },
+    { day: "Day 2", subjects: getSubCombo(1), color: "border-purple-500/25 text-purple-400" },
+    { day: "Day 3", subjects: getSubCombo(2), color: "border-[#00FF66]/25 text-[#00FF66]" },
+    { day: "Day 4", subjects: getSubCombo(3), color: "border-pink-500/25 text-pink-400" },
+    { day: "Day 5", subjects: getSubCombo(4), color: "border-[#FFEA00]/25 text-[#FFEA00]" }
   ];
 
   return (
@@ -114,6 +126,7 @@ export default function Phase2Panel({
           customSyllabus={customSyllabus}
           onSaveCustomSyllabus={onSaveCustomSyllabus}
           showTitle={false}
+          phaseId={2}
         />
       </div>
 

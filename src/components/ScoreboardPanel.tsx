@@ -9,22 +9,38 @@ import {
   PieChart, 
   ClipboardList, 
   HelpCircle,
-  Award
+  Award,
+  Clock,
+  Timer,
+  CheckCircle,
+  Flame,
+  Target
 } from "lucide-react";
-import { TestAnalytics, SubjectConfig } from "../types";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
+import { TestAnalytics, SubjectConfig, FocusSession } from "../types";
+import AchievementSystem from "./AchievementSystem";
+import StudyStreakCalendar from "./StudyStreakCalendar";
 
 interface ScoreboardPanelProps {
   userSubjects: SubjectConfig[];
   tests: TestAnalytics[];
   onAddTest: (newTest: Omit<TestAnalytics, "id" | "percentage" | "date">) => Promise<void>;
   onDeleteTest?: (id: string) => Promise<void>; // Optional delete helper
+  focusSessions?: FocusSession[];
+  onOpenTimer?: () => void;
+  onDeleteFocusSession?: (id: string) => Promise<void>;
+  phaseStats?: { phase1: number, phase2: number, phase3: number, phase4: number, phase5: number };
 }
 
 export default function ScoreboardPanel({ 
   userSubjects, 
   tests, 
   onAddTest,
-  onDeleteTest 
+  onDeleteTest,
+  focusSessions = [],
+  onOpenTimer,
+  onDeleteFocusSession,
+  phaseStats
 }: ScoreboardPanelProps) {
   const [title, setTitle] = useState("");
   const [selectedSubject, setSelectedSubject] = useState(userSubjects[0]?.name || "General");
@@ -33,6 +49,89 @@ export default function ScoreboardPanel({
   const [maxScore, setMaxScore] = useState<number | "">("");
   const [gritLog, setGritLog] = useState("");
   const [chartType, setChartType] = useState<"BAR" | "LINE" | "RADIAL">("BAR");
+
+
+  const totalFocusMinutes = focusSessions.reduce((sum, s) => sum + s.durationMinutes, 0);
+  const totalFocusHours = Math.floor(totalFocusMinutes / 60);
+  const remainingFocusMins = totalFocusMinutes % 60;
+
+  // Calculate consecutive days streak based on logged focus sessions
+  const streakStats = React.useMemo(() => {
+    if (!focusSessions || focusSessions.length === 0) {
+      return { currentStreak: 0, longestStreak: 0, loggedToday: false };
+    }
+
+    const toLocalDateStr = (dateInput: string | number | Date) => {
+      const d = new Date(dateInput);
+      if (isNaN(d.getTime())) return null;
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    const dateSet = new Set<string>();
+    focusSessions.forEach(s => {
+      if (s.completedAt) {
+        const dStr = toLocalDateStr(s.completedAt);
+        if (dStr) dateSet.add(dStr);
+      }
+    });
+
+    if (dateSet.size === 0) {
+      return { currentStreak: 0, longestStreak: 0, loggedToday: false };
+    }
+
+    const now = new Date();
+    const todayStr = toLocalDateStr(now)!;
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = toLocalDateStr(yesterday)!;
+
+    const loggedToday = dateSet.has(todayStr);
+
+    let currentStreak = 0;
+    const anchorDate = loggedToday ? now : (dateSet.has(yesterdayStr) ? yesterday : null);
+
+    if (anchorDate) {
+      let curr = new Date(anchorDate);
+      while (true) {
+        const dStr = toLocalDateStr(curr);
+        if (dStr && dateSet.has(dStr)) {
+          currentStreak++;
+          curr.setDate(curr.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    }
+
+    const sortedDates = Array.from(dateSet).sort();
+    let longestStreak = 0;
+    let tempStreak = 0;
+    let prevTs: number | null = null;
+
+    sortedDates.forEach(dStr => {
+      const [y, m, d] = dStr.split("-").map(Number);
+      const ts = new Date(y, m - 1, d).getTime();
+      if (prevTs === null) {
+        tempStreak = 1;
+      } else {
+        const diffDays = Math.round((ts - prevTs) / (1000 * 60 * 60 * 24));
+        if (diffDays === 1) {
+          tempStreak++;
+        } else if (diffDays > 1) {
+          tempStreak = 1;
+        }
+      }
+      if (tempStreak > longestStreak) {
+        longestStreak = tempStreak;
+      }
+      prevTs = ts;
+    });
+
+    return { currentStreak, longestStreak, loggedToday };
+  }, [focusSessions]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +193,12 @@ export default function ScoreboardPanel({
 
   return (
     <div className="space-y-6">
+      <AchievementSystem
+        tests={tests}
+        focusSessions={focusSessions}
+        userSubjects={userSubjects}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Columns 1 & 2: Score entry and list */}
@@ -210,6 +315,7 @@ export default function ScoreboardPanel({
                     <th className="py-2.5">Type</th>
                     <th className="py-2.5 text-center">Score</th>
                     <th className="py-2.5 text-right pr-3">Percentage</th>
+                    <th className="py-2.5 text-center pr-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/2">
@@ -229,12 +335,169 @@ export default function ScoreboardPanel({
                       <td className="py-2 text-right text-[#00FF66] font-bold pr-3">
                         {test.percentage}%
                       </td>
+                      <td className="py-2 text-center pr-3">
+                        <button
+                          onClick={async () => {
+                            if (onDeleteTest && confirm(`Are you sure you want to delete test log "${test.name}"?`)) {
+                              await onDeleteTest(test.id);
+                            }
+                          }}
+                          disabled={!onDeleteTest}
+                          className="p-1 hover:bg-[#FF0055]/15 text-[#FF0055]/80 hover:text-[#FF0055] rounded transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                          title="Delete test log"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   {tests.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="text-center py-8 text-slate-500 italic">
+                      <td colSpan={7} className="text-center py-8 text-slate-500 italic">
                         No previous test entries registered. Add assessment data above to construct the report.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Focus Study Blocks Analytics & Log Card */}
+          <div className="border border-[#00F0FF]/20 bg-[#12121A]/80 rounded-xl p-5 text-slate-300 space-y-4 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
+              <div>
+                <h3 className="text-xs font-bold text-slate-100 uppercase tracking-widest flex items-center gap-2">
+                  <Timer className="text-[#00F0FF] animate-pulse" size={16} />
+                  FOCUS STUDY SESSIONS & METRICS
+                </h3>
+                <p className="text-[10px] text-slate-400 uppercase mt-0.5">
+                  Tracked Pomodoro & Deep Work Blocks across enrolled subjects
+                </p>
+              </div>
+
+              {onOpenTimer && (
+                <button
+                  type="button"
+                  onClick={onOpenTimer}
+                  className="px-3.5 py-1.5 rounded-lg bg-[#00F0FF]/15 hover:bg-[#00F0FF]/25 text-[#00F0FF] border border-[#00F0FF]/30 font-bold text-[10px] uppercase flex items-center gap-1.5 cursor-pointer transition-all shrink-0"
+                >
+                  <Plus size={13} /> LAUNCH FOCUS TIMER
+                </button>
+              )}
+            </div>
+
+            {/* Metric Overview Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3 bg-[#0A0A0F] border border-white/5 rounded-xl flex flex-col justify-between">
+                <span className="text-[9px] text-slate-500 font-bold uppercase block">Total Focused Time</span>
+                <span className="text-lg font-black text-[#00F0FF] mt-1">
+                  {totalFocusHours > 0 ? `${totalFocusHours}h ${remainingFocusMins}m` : `${remainingFocusMins}m`}
+                </span>
+              </div>
+
+              <div className="p-3 bg-[#0A0A0F] border border-white/5 rounded-xl flex flex-col justify-between">
+                <span className="text-[9px] text-slate-500 font-bold uppercase block">Completed Sessions</span>
+                <span className="text-lg font-black text-purple-400 mt-1">
+                  {focusSessions.length} Blocks
+                </span>
+              </div>
+
+              {/* Consistency Streak Counter Card */}
+              <div className={`p-3 bg-[#0A0A0F] border rounded-xl flex flex-col justify-between relative overflow-hidden transition-all ${
+                streakStats.currentStreak > 0
+                  ? "border-amber-500/40 bg-gradient-to-br from-amber-500/10 via-[#0A0A0F] to-[#0A0A0F] shadow-lg shadow-amber-500/5"
+                  : "border-white/5"
+              }`}>
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-[9px] text-slate-500 font-bold uppercase flex items-center gap-1">
+                    <Flame size={12} className={streakStats.currentStreak > 0 ? "text-amber-400 animate-pulse" : "text-slate-500"} />
+                    Consistency Streak
+                  </span>
+                  {streakStats.loggedToday && (
+                    <span className="text-[8px] font-extrabold uppercase px-1 py-0.2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded">
+                      Today!
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-baseline gap-1.5 mt-1">
+                  <span className={`text-lg font-black ${streakStats.currentStreak > 0 ? "text-amber-400" : "text-slate-400"}`}>
+                    {streakStats.currentStreak} {streakStats.currentStreak === 1 ? "Day" : "Days"}
+                  </span>
+                  {streakStats.longestStreak > 0 && (
+                    <span className="text-[9.5px] text-slate-500 font-semibold" title="Best streak achieved">
+                      (Best: {streakStats.longestStreak}d)
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-3 bg-[#0A0A0F] border border-white/5 rounded-xl flex flex-col justify-between">
+                <span className="text-[9px] text-slate-500 font-bold uppercase block">Top Focused Subject</span>
+                <span className="text-sm font-extrabold text-[#00FF66] truncate block mt-1">
+                  {(() => {
+                    if (focusSessions.length === 0) return "None yet";
+                    const counts: Record<string, number> = {};
+                    focusSessions.forEach(s => {
+                      counts[s.subject] = (counts[s.subject] || 0) + s.durationMinutes;
+                    });
+                    const top = Object.entries(counts).sort((a,b) => b[1] - a[1])[0];
+                    return top ? `${top[0]} (${top[1]}m)` : "None";
+                  })()}
+                </span>
+              </div>
+            </div>
+
+            {/* Recent Completed Sessions Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-[11px] font-mono">
+                <thead>
+                  <tr className="border-b border-white/5 text-slate-500 text-[10px] uppercase">
+                    <th className="py-2 px-3">Completed</th>
+                    <th className="py-2">Subject</th>
+                    <th className="py-2">Duration</th>
+                    <th className="py-2">Focus Objective / Notes</th>
+                    <th className="py-2 text-center pr-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {focusSessions.map((session) => (
+                    <tr key={session.id} className="hover:bg-white/1 transition-colors">
+                      <td className="py-2 px-3 text-slate-500 whitespace-nowrap text-[10px]">
+                        {session.completedAt ? new Date(session.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
+                      </td>
+                      <td className="py-2">
+                        <span className="px-2 py-0.5 rounded bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/20 font-bold text-[9px] uppercase">
+                          {session.subject}
+                        </span>
+                      </td>
+                      <td className="py-2 text-slate-200 font-black">
+                        {session.durationMinutes}m ({session.preset})
+                      </td>
+                      <td className="py-2 text-slate-400 text-[10.5px] max-w-[200px] truncate">
+                        {session.notes || "General focus block"}
+                      </td>
+                      <td className="py-2 text-center pr-3">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (onDeleteFocusSession && confirm("Delete focus log entry?")) {
+                              await onDeleteFocusSession(session.id);
+                            }
+                          }}
+                          disabled={!onDeleteFocusSession}
+                          className="p-1 hover:bg-[#FF0055]/15 text-[#FF0055]/80 hover:text-[#FF0055] rounded transition-colors disabled:opacity-30 cursor-pointer"
+                          title="Delete focus session"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {focusSessions.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="text-center py-6 text-slate-500 italic text-[10.5px]">
+                        No focus study sessions logged yet. Click "LAUNCH FOCUS TIMER" above to start a 25m or 50m session!
                       </td>
                     </tr>
                   )}
@@ -246,6 +509,7 @@ export default function ScoreboardPanel({
         </div>
 
         {/* Column 3: Custom SVG interconnected progress chart */}
+        <div className="flex flex-col gap-6">
         <div className="border border-white/5 bg-[#12121A]/80 p-5 rounded-xl text-slate-300 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between border-b border-white/5 pb-3.5 mb-4">
@@ -288,29 +552,41 @@ export default function ScoreboardPanel({
             <div className="bg-[#0A0A0F] border border-white/5 p-3 rounded-xl min-h-[200px] flex items-center justify-center relative overflow-hidden">
               
               {chartType === "BAR" && (
-                <div className="w-full space-y-3.5 py-2">
-                  {subjectAggregates.map((item, idx) => {
-                    const barGlowColors = [
-                      "bg-[#00F0FF] shadow-[#00F0FF]/25",
-                      "bg-[#FF0055] shadow-[#FF0055]/25",
-                      "bg-[#00FF66] shadow-[#00FF66]/25",
-                      "bg-[#FFEA00] shadow-[#FFEA00]/25",
-                      "bg-purple-500 shadow-purple-500/25"
-                    ];
-                    const barColor = barGlowColors[idx % barGlowColors.length];
+                <div className="w-full space-y-4 py-2">
+                  {userSubjects.map((subj) => {
+                    const subjTests = tests.filter(t => t.subject?.toLowerCase() === subj.name.toLowerCase());
+                    const obtained = subjTests.reduce((acc, t) => acc + t.rawScore, 0);
+                    const max = subjTests.reduce((acc, t) => acc + t.totalMaxPoints, 0);
+                    const percentage = max > 0 ? Math.round((obtained / max) * 100) : 0;
+
+                    let barColor = "bg-[#00F0FF] shadow-[#00F0FF]/25 text-[#00F0FF]";
+                    let statusBadge = "[SYSTEM STABLE]";
+
+                    if (percentage < 70) {
+                      barColor = "bg-[#FF0055] shadow-[#FF0055]/25 text-[#FF0055]";
+                      statusBadge = "[WARNING: CONCEPT GAP]";
+                    } else if (percentage > 90) {
+                      barColor = "bg-[#00FF66] shadow-[#00FF66]/25 text-[#00FF66]";
+                      statusBadge = "[SYSTEM MASTERED]";
+                    }
 
                     return (
-                      <div key={item.subject} className="space-y-1 text-[10.5px]">
-                        <div className="flex justify-between font-bold text-[10px] text-slate-400">
-                          <span className="uppercase text-slate-300">{item.subject}</span>
-                          <span>{item.percentage}% ({item.obtained}/{item.max})</span>
+                      <div key={subj.name} className="space-y-1.5 text-[10.5px]">
+                        <div className="flex justify-between items-center font-bold text-[10px]">
+                          <span className="uppercase text-slate-200">{subj.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[9px] font-mono ${barColor.split(" ")[2]}`}>
+                              {statusBadge}
+                            </span>
+                            <span className="text-slate-400">{percentage}% ({obtained}/{max})</span>
+                          </div>
                         </div>
-                        <div className="h-2 w-full bg-slate-905 bg-white/5 rounded-full overflow-hidden relative">
+                        <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden relative border border-white/5">
                           <motion.div
                             initial={{ width: 0 }}
-                            animate={{ width: `${item.percentage}%` }}
+                            animate={{ width: `${percentage}%` }}
                             transition={{ duration: 0.6, ease: "easeOut" }}
-                            className={`h-full rounded-full ${barColor} shadow-lg`}
+                            className={`h-full rounded-full ${barColor.split(" ")[0]} shadow-lg`}
                           />
                         </div>
                       </div>
@@ -435,6 +711,8 @@ export default function ScoreboardPanel({
             <span className="font-extrabold text-slate-300 block mb-1 uppercase tracking-wide">💡 SABERMETRICS CALCULATION:</span>
             Subjects with multiple logged tests are calculated progressively. Your scoreboard divides total marks obtained by total maximum criteria to derive real subject grades.
           </div>
+        </div>
+        <StudyStreakCalendar focusSessions={focusSessions || []} />
         </div>
 
       </div>

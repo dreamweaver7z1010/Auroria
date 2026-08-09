@@ -10,6 +10,7 @@ import {
   AlertCircle, 
   HelpCircle,
   FileCheck,
+  Download,
   Search,
   BookOpen,
   Image,
@@ -39,6 +40,103 @@ export default function PreExamPanel({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterSubject, setFilterSubject] = useState("ALL");
+
+
+  const exportToAnki = () => {
+    const escapeCsv = (str) => {
+      if (!str) return '""';
+      return '"' + str.replace(/"/g, '""').replace(/\n/g, '<br/>') + '"';
+    };
+
+    const csvRows = filteredMistakes.map(m => {
+      const front = `<strong>Subject:</strong> ${m.subject}<br/><strong>Error:</strong> ${m.description}<br/><br/><strong>Wrong Approach:</strong><br/>${m.wrongApproach}`;
+      const back = `<strong>Corrected Strategy:</strong><br/>${m.correctedSequence}${m.questionImage ? '<br/><br/><i>[Image Attached in Portal]</i>' : ''}`;
+      const tags = m.subject.replace(/\s+/g, '_');
+      return `${escapeCsv(front)},${escapeCsv(back)},${escapeCsv(tags)}`;
+    });
+
+    // Anki expects headers if we want to be fancy, but standard basic CSV works too
+    const header = "Front,Back,Tags\n";
+    const csvContent = header + csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'saber_mistakes_anki.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const generatePDF = () => {
+    const printWindow = window.open('', '', 'height=800,width=1000');
+    if (!printWindow) return;
+
+    const html = `
+      <html>
+        <head>
+          <title>Mistake Vault Summary</title>
+          <style>
+            body { font-family: 'Space Grotesk', system-ui, sans-serif; padding: 40px; color: #111; line-height: 1.5; background: #fff; }
+            h1 { font-size: 24px; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 30px; text-transform: uppercase; }
+            .subject-section { margin-bottom: 40px; }
+            .subject-title { font-size: 18px; font-weight: bold; background: #eee; padding: 8px 12px; margin-bottom: 15px; text-transform: uppercase; border-left: 4px solid #333; }
+            .mistake-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 6px; page-break-inside: avoid; }
+            .mistake-title { font-weight: bold; margin-bottom: 8px; font-size: 14px; }
+            .section { margin-top: 10px; font-size: 12px; padding: 8px; border-radius: 4px; }
+            .section-label { font-weight: bold; text-transform: uppercase; font-size: 10px; color: #555; display: block; margin-bottom: 4px; }
+            .wrong { background: #fff5f5; border-left: 3px solid #ef4444; }
+            .correct { background: #f0fdf4; border-left: 3px solid #22c55e; }
+            .status { font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 3px; display: inline-block; float: right; margin-left: 10px; }
+            .resolved { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+            .unresolved { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+            .mistake-image { max-width: 100%; max-height: 200px; margin-top: 10px; border: 1px solid #eee; border-radius: 4px; }
+            @media print {
+              body { padding: 0; }
+              .mistake-card { border: 1px solid #aaa; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Mistake Vault Summary</h1>
+          ${userSubjects.map(sub => {
+            const subMistakes = mistakes.filter(m => m.subject === sub.name);
+            if (subMistakes.length === 0) return '';
+            return `
+              <div class="subject-section">
+                <div class="subject-title">${sub.name}</div>
+                ${subMistakes.map(m => `
+                  <div class="mistake-card">
+                    <div class="status ${m.resolved ? 'resolved' : 'unresolved'}">
+                      ${m.resolved ? 'RESOLVED' : 'NEEDS REVIEW'}
+                    </div>
+                    <div class="mistake-title">${m.description}</div>
+                    <div class="section wrong">
+                      <span class="section-label">Wrong Approach:</span>
+                      ${m.wrongApproach}
+                    </div>
+                    <div class="section correct">
+                      <span class="section-label">Corrected Strategy:</span>
+                      ${m.correctedSequence}
+                    </div>
+                    ${m.questionImage ? `<img src="${m.questionImage}" class="mistake-image" alt="Question reference"/>` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            `;
+          }).join('')}
+          ${mistakes.length === 0 ? '<p>No mistakes logged yet.</p>' : ''}
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
+  };
 
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -80,7 +178,9 @@ export default function PreExamPanel({
   };
 
   // Filter mistakes
+  const enrolledSet = new Set(userSubjects.map(s => s.name));
   const filteredMistakes = mistakes.filter(m => {
+    if (!enrolledSet.has(m.subject)) return false;
     const matchesSearch = m.description.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           m.wrongApproach.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           m.correctedSequence.toLowerCase().includes(searchQuery.toLowerCase());
@@ -117,7 +217,7 @@ export default function PreExamPanel({
 
           <div className="space-y-1 bg-[#0A0A0F] border border-white/5 p-3 rounded-lg">
             <span className="text-[#FF0055] font-black text-[10px] uppercase block">📑 THE OCT/NOV DRILL</span>
-            <p className="text-slate-400 text-[10.5px]">Attempt the 3 variants of OCT/NOV 2026. This exposes the latest question styles introduced by board examiners.</p>
+            <p className="text-slate-400 text-[10.5px]">Attempt the OCT/NOV 2026 past papers. This exposes the latest question styles introduced by board examiners.</p>
           </div>
 
           <div className="space-y-1 bg-[#0A0A0F] border border-white/5 p-3 rounded-lg">
@@ -270,6 +370,23 @@ export default function PreExamPanel({
                   <option key={s.name} value={s.name}>{s.name}</option>
                 ))}
               </select>
+              <button
+                type="button"
+                onClick={generatePDF}
+                className="px-3 py-1.5 bg-teal-500/20 text-teal-300 border border-teal-500/50 hover:bg-teal-500/30 rounded flex items-center gap-1.5 uppercase font-bold text-[9px] tracking-wider transition-colors ml-2 cursor-pointer whitespace-nowrap"
+              >
+                <FileCheck size={12} />
+                Generate PDF Summary
+              </button>
+
+              <button
+                type="button"
+                onClick={exportToAnki}
+                className="px-3 py-1.5 bg-[#9D00FF]/20 text-[#9D00FF] border border-[#9D00FF]/50 hover:bg-[#9D00FF]/30 rounded flex items-center gap-1.5 uppercase font-bold text-[9px] tracking-wider transition-colors ml-2 cursor-pointer whitespace-nowrap"
+              >
+                <Download size={12} />
+                Export Anki CSV
+              </button>
             </div>
           </div>
 

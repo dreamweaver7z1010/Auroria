@@ -15,155 +15,23 @@ import {
   Check,
   Plus,
   FolderPlus,
-  BookOpen
+  BookOpen,
+  FileCheck,
+  Flame,
+  ShieldCheck,
+  Zap
 } from "lucide-react";
 import { SubjectId, SubjectConfig } from "../types";
-
-// Preset library matching the Cambridge AS-Level requested study units
-export const DEFAULT_PRESET_SYLLABUS: Record<string, { name: string; topics: string[] }[]> = {
-  "Chemistry": [
-    {
-      name: "Physical Chemistry",
-      topics: [
-        "Atomic structure",
-        "Atoms, molecules and stoichiometry",
-        "Chemical bonding",
-        "States of matter",
-        "Chemical energetics",
-        "Electrochemistry",
-        "Equilibria",
-        "Reaction kinetics"
-      ]
-    },
-    {
-      name: "Inorganic Chemistry",
-      topics: [
-        "The Periodic Table: chemical periodicity",
-        "Group 2",
-        "Group 17",
-        "Nitrogen and sulfur"
-      ]
-    },
-    {
-      name: "Organic Chemistry",
-      topics: [
-        "An introduction to AS Level organic chemistry",
-        "Hydrocarbons",
-        "Halogen compounds",
-        "Hydroxy compounds",
-        "Carbonyl compounds",
-        "Carboxylic acids and derivatives",
-        "Nitrogen compounds",
-        "Polymerisation",
-        "Organic synthesis"
-      ]
-    }
-  ],
-  "Physics": [
-    {
-      name: "Physical Units",
-      topics: [
-        "Physical quantities and units"
-      ]
-    },
-    {
-      name: "Mechanics",
-      topics: [
-        "Kinematics",
-        "Dynamics",
-        "Forces, density and pressure",
-        "Work, energy and power",
-        "Deformation of solids"
-      ]
-    },
-    {
-      name: "Waves & Electricity",
-      topics: [
-        "Waves",
-        "Superposition",
-        "Electricity",
-        "D.C. circuits",
-        "Particle physics"
-      ]
-    }
-  ],
-  "Computer Science": [
-    {
-      name: "Theory (Paper 1)",
-      topics: [
-        "Information representation",
-        "Communication and internet technologies",
-        "Hardware",
-        "Processor fundamentals",
-        "System software",
-        "Security, privacy and data integrity",
-        "Ethics and ownership",
-        "Databases"
-      ]
-    },
-    {
-      name: "Problem-solving & Programming (Paper 2)",
-      topics: [
-        "Algorithm design and problem-solving",
-        "Programming (pseudocode / high-level language)",
-        "Data structures and algorithms",
-        "Software development"
-      ]
-    }
-  ],
-  "Math": [
-    {
-      name: "Pure Mathematics (Paper 1)",
-      topics: [
-        "Quadratics",
-        "Functions",
-        "Coordinate geometry",
-        "Circular measure",
-        "Trigonometry",
-        "Series",
-        "Differentiation",
-        "Integration"
-      ]
-    },
-    {
-      name: "Probability & Statistics (Paper 5)",
-      topics: [
-        "Representation of data",
-        "Permutations and combinations",
-        "Probability",
-        "Discrete random variables",
-        "The normal distribution"
-      ]
-    }
-  ],
-  "English": [
-    {
-      name: "Core Structure & Skills",
-      topics: [
-        "Essay (Paper 1): One essay (600–700 words) from 10 questions",
-        "Comprehension (Paper 2): Compulsory questions on unseen texts"
-      ]
-    }
-  ]
-};
-
-const normalizeSubjectName = (name: string): string => {
-  const lower = name.toLowerCase();
-  if (lower.includes("chem")) return "Chemistry";
-  if (lower.includes("phys")) return "Physics";
-  if (lower.includes("comput") || lower.includes("cs")) return "Computer Science";
-  if (lower.includes("math")) return "Math";
-  if (lower.includes("english") || lower.includes("general paper") || lower.includes("8021")) return "English";
-  return name;
-};
+import { DEFAULT_PRESET_SYLLABUS, normalizeSubjectName, getSyllabusMap as getSyllabusMapUtil } from "../utils/syllabusUtils";
 
 interface SyllabusTrackerProps {
   userSubjects: SubjectConfig[];
-  onToggleTopic: (subject: SubjectId, topic: string, completed: boolean) => Promise<void>;
+  onToggleTopic: (subject: SubjectId, topic: string, completed: boolean, phaseId?: number) => Promise<void>;
   loadingToggle: boolean;
   customSyllabus?: Record<string, any>;
   onSaveCustomSyllabus?: (subject: string, syllabusData: any) => Promise<void>;
   showTitle?: boolean;
+  phaseId?: number;
 }
 
 export default function SyllabusTracker({ 
@@ -172,7 +40,8 @@ export default function SyllabusTracker({
   loadingToggle,
   customSyllabus = {},
   onSaveCustomSyllabus,
-  showTitle = true
+  showTitle = true,
+  phaseId
 }: SyllabusTrackerProps) {
   const firstSub = userSubjects[0]?.name || "Chemistry";
   const [selectedSubject, setSelectedSubject] = useState<SubjectId>(firstSub);
@@ -183,7 +52,8 @@ export default function SyllabusTracker({
     : firstSub;
 
   const sCfg = userSubjects.find(s => s.name === activeSubject);
-  const completedList = new Set(sCfg?.completedTopics || []);
+  const pKey = phaseId ? `completedTopics_phase${phaseId}` : "completedTopics";
+  const completedList = new Set<string>((sCfg as any)?.[pKey] || sCfg?.completedTopics || []);
 
   // Form states matching chronological checklist style 
   const [targetGroup, setTargetGroup] = useState("");
@@ -216,17 +86,51 @@ export default function SyllabusTracker({
     if (DEFAULT_PRESET_SYLLABUS[matchedKey]) {
       return DEFAULT_PRESET_SYLLABUS[matchedKey];
     }
+
+    const sObj = userSubjects.find(s => s.name === subjName);
+    if (sObj && sObj.components && sObj.components.length > 0) {
+      return sObj.components.map(comp => ({
+        name: comp.name,
+        topics: [
+          `${comp.name}: Theoretical Principles & Key Terms`,
+          `${comp.name}: Structured Problem Solving & Analysis`,
+          `${comp.name}: Case Studies & Applied Exercises`
+        ]
+      }));
+    }
     
     return [
       {
-        name: "General Foundations Group",
+        name: `${subjName} Paper 1 Core Theory`,
         topics: [
           "Theoretical Framework Overview",
-          "Advanced Methodical Applications"
+          "Key Definitions & Conceptual Models",
+          "Foundational Principles"
+        ]
+      },
+      {
+        name: `${subjName} Paper 2 Applied Analysis`,
+        topics: [
+          "Advanced Methodical Applications",
+          "Structured Exam Questions",
+          "Evaluation & Case Study Analysis"
         ]
       }
     ];
   };
+
+  const calculateSyllabusProgress = (subjName: SubjectId) => {
+    const s = userSubjects.find(sc => sc.name === subjName);
+    const pKeySub = phaseId ? `completedTopics_phase${phaseId}` : "completedTopics";
+    const completedCount = ((s as any)?.[pKeySub] || s?.completedTopics || []).length;
+    const map = getSyllabusMap(subjName);
+    const totalTopicsInSyllabus = map.reduce((sum, g) => sum + g.topics.length, 0) || 1;
+    return parseFloat(((completedCount / totalTopicsInSyllabus) * 100).toFixed(0));
+  };
+
+  // Calculate combat readiness metrics
+  const activeSyllabusPct = calculateSyllabusProgress(activeSubject);
+  const combatReadinessPct = activeSyllabusPct;
 
   const currentSyllabus = getSyllabusMap(activeSubject);
 
@@ -236,14 +140,6 @@ export default function SyllabusTracker({
       setExpandedGroupName(currentSyllabus[0].name);
     }
   }, [activeSubject]);
-
-  const calculateSyllabusProgress = (subjName: SubjectId) => {
-    const s = userSubjects.find(sc => sc.name === subjName);
-    const completedCount = s?.completedTopics?.length || 0;
-    const map = getSyllabusMap(subjName);
-    const totalTopicsInSyllabus = map.reduce((sum, g) => sum + g.topics.length, 0) || 1;
-    return parseFloat(((completedCount / totalTopicsInSyllabus) * 100).toFixed(0));
-  };
 
   // Dispatch helper to add custom named groups and topic chapters
   const handleAddNewTopicNode = async (e: React.FormEvent) => {
@@ -266,13 +162,10 @@ export default function SyllabusTracker({
     );
 
     if (existingGroupIdx !== -1) {
-      // Avoid duplications
-      if (!updatedList[existingGroupIdx].topics.includes(topicToAdd)) {
-        updatedList[existingGroupIdx] = {
-          ...updatedList[existingGroupIdx],
-          topics: [...updatedList[existingGroupIdx].topics, topicToAdd]
-        };
-      }
+      updatedList[existingGroupIdx] = {
+        ...updatedList[existingGroupIdx],
+        topics: [...updatedList[existingGroupIdx].topics, topicToAdd]
+      };
     } else {
       updatedList.push({
         name: groupToFind,
@@ -297,13 +190,13 @@ export default function SyllabusTracker({
     }
   };
 
-  // Delete a topic in a group
-  const handleDeleteTopic = async (groupName: string, topicText: string) => {
+  // Delete a topic in a group by index
+  const handleDeleteTopic = async (groupName: string, topicIndex: number) => {
     const updated = currentSyllabus.map(g => {
       if (g.name === groupName) {
         return {
           ...g,
-          topics: g.topics.filter(t => t !== topicText)
+          topics: g.topics.filter((_, i) => i !== topicIndex)
         };
       }
       return g;
@@ -416,31 +309,50 @@ export default function SyllabusTracker({
   };
 
   return (
-    <div className="border border-white/5 bg-[#12121A]/80 backdrop-blur-md rounded-xl p-5 relative overflow-hidden font-mono text-xs">
+    <div className="border border-white/5 bg-[#12121A]/80 backdrop-blur-md rounded-xl p-5 relative overflow-hidden font-mono text-xs space-y-4">
       <div className="absolute top-0 right-0 w-32 h-32 bg-[#9D00FF]/5 rounded-full blur-2xl pointer-events-none" />
 
-      {/* Title block with custom upload suite */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-white/5">
-        <h3 className="text-xs font-black text-slate-100 flex items-center gap-2 uppercase tracking-wider">
-          <BookOpen className="text-amber-500 animate-pulse shrink-0" size={14} />
-          CHRONOLOGICAL SYLLABUS CHECKLIST TRACK
-        </h3>
-        
-        <button
-          onClick={() => setPanelOpen(!panelOpen)}
-          className="px-3 py-1 bg-[#12121A] border border-white/10 hover:border-[#9D00FF] hover:bg-[#9D00FF]/10 text-slate-300 font-bold rounded flex items-center gap-1.5 transition-all text-[10px] uppercase cursor-pointer"
-        >
-          <Upload size={11} className="text-[#9D00FF]" />
-          Bulk Paste Console
-          {panelOpen ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-        </button>
+      {/* Title & View Switcher header block */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-white/5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {showTitle && (
+            <h3 className="text-xs font-black text-slate-100 flex items-center gap-2 uppercase tracking-wider">
+              <BookOpen className="text-amber-500 animate-pulse shrink-0" size={14} />
+              {phaseId === 3 ? "PHASE 3 EXAM MASTERY MATRIX" : "CHRONOLOGICAL SYLLABUS CHECKLIST TRACK"}
+            </h3>
+          )}
+
+          {/* Syllabus Checklist header */}
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-300 rounded text-[10px] font-bold uppercase">
+            <BookOpen size={12} />
+            Syllabus Checklist
+          </div>
+        </div>
+
+        {/* Combat Readiness Indicator Banner */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 px-3 py-1 bg-[#0A0A0F] border border-white/10 rounded-lg text-[10px]">
+            <Flame className="text-[#00FF66] animate-pulse" size={13} />
+            <span className="text-slate-400 font-bold uppercase">COMBAT READINESS:</span>
+            <span className="font-extrabold text-[#00FF66] text-xs">{combatReadinessPct}%</span>
+          </div>
+
+          <button
+            onClick={() => setPanelOpen(!panelOpen)}
+            className="px-3 py-1 bg-[#12121A] border border-white/10 hover:border-[#9D00FF] hover:bg-[#9D00FF]/10 text-slate-300 font-bold rounded flex items-center gap-1.5 transition-all text-[10px] uppercase cursor-pointer"
+          >
+            <Upload size={11} className="text-[#9D00FF]" />
+            Bulk Paste
+            {panelOpen ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+          </button>
+        </div>
       </div>
 
       {panelOpen && (
         <motion.div 
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="mb-5 p-4 border border-white/10 bg-[#0A0A0F]/90 rounded-xl space-y-4 shadow-2xl relative overflow-hidden text-slate-300"
+          className="p-4 border border-white/10 bg-[#0A0A0F]/90 rounded-xl space-y-4 shadow-2xl relative overflow-hidden text-slate-300"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
@@ -518,50 +430,50 @@ export default function SyllabusTracker({
       )}
 
       {/* Main interactive form to input topics into own named group */}
-      <form onSubmit={handleAddNewTopicNode} className="bg-[#0A0A0F] border border-white/15 p-3.5 rounded-lg grid grid-cols-1 sm:grid-cols-12 gap-3 mb-5 text-xs">
-        <div className="sm:col-span-4 space-y-1">
-          <label className="text-[9px] text-slate-500 uppercase font-bold tracking-wide flex justify-between">
-            <span>Group Name / Category</span>
-            {currentSyllabus.length > 0 && <span className="text-[#00F0FF] text-[8px] italic pr-1">Use list or type new</span>}
-          </label>
-          <div className="relative">
+      <form onSubmit={handleAddNewTopicNode} className="bg-[#0A0A0F] border border-white/15 p-3.5 rounded-lg grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs">
+          <div className="sm:col-span-4 space-y-1">
+            <label className="text-[9px] text-slate-500 uppercase font-bold tracking-wide flex justify-between">
+              <span>Group Name / Category</span>
+              {currentSyllabus.length > 0 && <span className="text-[#00F0FF] text-[8px] italic pr-1">Use list or type new</span>}
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                list={`groups-list-${activeSubject}`}
+                value={targetGroup}
+                onChange={(e) => setTargetGroup(e.target.value)}
+                placeholder="e.g. Physical Chemistry, Organic, Mechanics"
+                className="w-full bg-[#12121A] border border-white/10 rounded px-2.5 py-1 text-slate-200 focus:outline-none focus:border-amber-400 font-mono text-xs"
+              />
+              <datalist id={`groups-list-${activeSubject}`}>
+                {currentSyllabus.map(g => (
+                  <option key={g.name} value={g.name} />
+                ))}
+              </datalist>
+            </div>
+          </div>
+
+          <div className="sm:col-span-5 space-y-1">
+            <label className="text-[9px] text-slate-500 uppercase font-bold tracking-wide block">Topic Name / Lesson Title</label>
             <input
               type="text"
-              list={`groups-list-${activeSubject}`}
-              value={targetGroup}
-              onChange={(e) => setTargetGroup(e.target.value)}
-              placeholder="e.g. Physical Chemistry, Organic, Mechanics"
+              value={newTopicName}
+              onChange={(e) => setNewTopicName(e.target.value)}
+              placeholder="e.g. Nucleophilic substitution mechanisms"
               className="w-full bg-[#12121A] border border-white/10 rounded px-2.5 py-1 text-slate-200 focus:outline-none focus:border-amber-400 font-mono text-xs"
             />
-            <datalist id={`groups-list-${activeSubject}`}>
-              {currentSyllabus.map(g => (
-                <option key={g.name} value={g.name} />
-              ))}
-            </datalist>
           </div>
-        </div>
 
-        <div className="sm:col-span-5 space-y-1">
-          <label className="text-[9px] text-slate-500 uppercase font-bold tracking-wide block">Topic Name / Lesson Title</label>
-          <input
-            type="text"
-            value={newTopicName}
-            onChange={(e) => setNewTopicName(e.target.value)}
-            placeholder="e.g. Nucleophilic substitution mechanisms"
-            className="w-full bg-[#12121A] border border-white/10 rounded px-2.5 py-1 text-slate-200 focus:outline-none focus:border-amber-400 font-mono text-xs"
-          />
-        </div>
-
-        <div className="sm:col-span-3 flex items-end">
-          <button
-            type="submit"
-            className="w-full py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:opacity-90 text-black font-black uppercase text-[10px] rounded tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5"
-          >
-            <FolderPlus size={12} />
-            + File Topic Node
-          </button>
-        </div>
-      </form>
+          <div className="sm:col-span-3 flex items-end">
+            <button
+              type="submit"
+              className="w-full py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:opacity-90 text-black font-black uppercase text-[10px] rounded tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <FolderPlus size={12} />
+              + File Topic Node
+            </button>
+          </div>
+        </form>
 
       {/* Layout Grid containing Subject left rail and customizable checklists */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -569,7 +481,7 @@ export default function SyllabusTracker({
         {/* Left selector rail */}
         <div className="md:col-span-1 space-y-2">
           {userSubjects.map(s => {
-            const progress = calculateSyllabusProgress(s.name);
+            const topicProgress = calculateSyllabusProgress(s.name);
             const isSelected = activeSubject === s.name;
             return (
               <button
@@ -588,14 +500,17 @@ export default function SyllabusTracker({
                 )}
                 <div className="flex justify-between items-center w-full pr-1 font-mono uppercase tracking-wide">
                   <span className="truncate max-w-[120px]">{s.name}</span>
-                  <span className={`${isSelected ? "text-[#00FF66]" : "text-slate-500"} font-bold`}>{progress}%</span>
+                  <span className={`${isSelected ? "text-[#00FF66]" : "text-slate-500"} font-bold text-[10px]`}>
+                    {topicProgress}%
+                  </span>
                 </div>
                 
-                {/* Progress bar line */}
-                <div className="w-full bg-white/5 h-1 rounded mt-2 overflow-hidden">
+                {/* Single Progress bar line */}
+                <div className="w-full bg-white/5 h-1.5 rounded mt-2 overflow-hidden flex">
                   <div 
                     className={`h-full transition-all duration-500 ${isSelected ? "bg-amber-400" : "bg-slate-700"}`} 
-                    style={{ width: `${progress}%` }} 
+                    style={{ width: `${topicProgress}%` }} 
+                    title={`Syllabus Progress: ${topicProgress}%`}
                   />
                 </div>
               </button>
@@ -603,96 +518,98 @@ export default function SyllabusTracker({
           })}
         </div>
 
-        {/* Right side Accordion and topics directory checklist */}
-        <div className="md:col-span-3 space-y-3">
-          {currentSyllabus.map((group, maxIdx) => {
-            const isExpanded = expandedGroupName === group.name;
-            const subCompletedList = group.topics.filter(t => completedList.has(t));
-            
-            return (
-              <div key={maxIdx} className="bg-[#0A0A0F] border border-white/5 rounded-lg overflow-hidden">
-                
-                {/* Accordion Header bar */}
-                <div 
-                  className="w-full text-left p-3.5 bg-[#111118]/70 flex items-center justify-between hover:bg-[#11111d] transition-all text-xs border-b border-white/3 cursor-pointer"
-                  onClick={() => setExpandedGroupName(isExpanded ? "" : group.name)}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="font-extrabold text-amber-400 tracking-wider text-[11.5px] uppercase">
-                      STUDY GROUP // {group.name}
-                    </span>
-                    <span className="text-[10px] text-slate-500">
-                      ({subCompletedList.length}/{group.topics.length} Done)
-                    </span>
+        {/* Right side area: SYLLABUS CHECKLIST */}
+        <div className="md:col-span-3">
+          <div className="space-y-3">
+            {currentSyllabus.map((group, maxIdx) => {
+              const isExpanded = expandedGroupName === group.name;
+              const subCompletedList = group.topics.filter(t => completedList.has(t));
+              
+              return (
+                <div key={maxIdx} className="bg-[#0A0A0F] border border-white/5 rounded-lg overflow-hidden">
+                  
+                  {/* Accordion Header bar */}
+                  <div 
+                    className="w-full text-left p-3.5 bg-[#111118]/70 flex items-center justify-between hover:bg-[#11111d] transition-all text-xs border-b border-white/3 cursor-pointer"
+                    onClick={() => setExpandedGroupName(isExpanded ? "" : group.name)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="font-extrabold text-amber-400 tracking-wider text-[11.5px] uppercase">
+                        STUDY GROUP // {group.name}
+                      </span>
+                      <span className="text-[10px] text-slate-500">
+                        ({subCompletedList.length}/{group.topics.length} Done)
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                      {/* Delete group action */}
+                      <button
+                        onClick={() => handleDeleteGroup(group.name)}
+                        className="p-1 px-1.5 border border-[#FF0055]/20 hover:bg-[#FF0055]/15 text-[#FF0055] rounded hover:border-[#FF0055]/40 transition-colors cursor-pointer mr-2"
+                        title="Delete entire group and topics"
+                      >
+                        <Trash2 size={11} />
+                      </button>
+                      <button 
+                        onClick={() => setExpandedGroupName(isExpanded ? "" : group.name)}
+                        className="text-slate-400 hover:text-slate-200 cursor-pointer"
+                      >
+                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
-                    {/* Delete group action */}
-                    <button
-                      onClick={() => handleDeleteGroup(group.name)}
-                      className="p-1 px-1.5 border border-[#FF0055]/20 hover:bg-[#FF0055]/15 text-[#FF0055] rounded hover:border-[#FF0055]/40 transition-colors cursor-pointer mr-2"
-                      title="Delete entire group and topics"
-                    >
-                      <Trash2 size={11} />
-                    </button>
-                    <button 
-                      onClick={() => setExpandedGroupName(isExpanded ? "" : group.name)}
-                      className="text-slate-400 hover:text-slate-200 cursor-pointer"
-                    >
-                      {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                    </button>
-                  </div>
-                </div>
+                  {/* Collapsed elements */}
+                  {isExpanded && (
+                    <div className="p-3.5 space-y-2.5 max-h-[250px] overflow-y-auto divide-y divide-white/2">
+                      {group.topics.map((topic, ti) => {
+                        const done = completedList.has(topic);
+                        return (
+                          <div key={ti} className="pt-2 flex items-center justify-between text-[11px] font-mono group">
+                            <button
+                              disabled={loadingToggle}
+                              onClick={() => onToggleTopic(activeSubject, topic, !done, phaseId)}
+                              className="flex-1 text-left flex items-center gap-2.5 cursor-pointer"
+                            >
+                              {done ? (
+                                <CheckSquare size={13} className="text-[#00FF66] shrink-0" />
+                              ) : (
+                                <Square size={13} className="text-slate-500 group-hover:text-slate-300 shrink-0" />
+                              )}
+                              <span className={done ? "line-through text-slate-500 font-medium" : "text-slate-200"}>
+                                {topic}
+                              </span>
+                            </button>
 
-                {/* Collapsed elements */}
-                {isExpanded && (
-                  <div className="p-3.5 space-y-2.5 max-h-[250px] overflow-y-auto divide-y divide-white/2">
-                    {group.topics.map((topic, ti) => {
-                      const done = completedList.has(topic);
-                      return (
-                        <div key={ti} className="pt-2 flex items-center justify-between text-[11px] font-mono group">
-                          <button
-                            disabled={loadingToggle}
-                            onClick={() => onToggleTopic(activeSubject, topic, !done)}
-                            className="flex-1 text-left flex items-center gap-2.5 cursor-pointer"
-                          >
-                            {done ? (
-                              <CheckSquare size={13} className="text-[#00FF66] shrink-0" />
-                            ) : (
-                              <Square size={13} className="text-slate-500 group-hover:text-slate-300 shrink-0" />
-                            )}
-                            <span className={done ? "line-through text-slate-500 font-medium" : "text-slate-200"}>
-                              {topic}
-                            </span>
-                          </button>
+                            <button
+                              onClick={() => handleDeleteTopic(group.name, ti)}
+                              className="p-1 text-slate-600 hover:text-[#FF0055] transition-colors cursor-pointer"
+                              title="Remove topic node"
+                            >
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                        );
+                      })}
 
-                          <button
-                            onClick={() => handleDeleteTopic(group.name, topic)}
-                            className="p-1 text-slate-600 hover:text-[#FF0055] transition-colors cursor-pointer"
-                            title="Remove topic node"
-                          >
-                            <Trash2 size={11} />
-                          </button>
+                      {group.topics.length === 0 && (
+                        <div className="text-center py-6 text-slate-650 text-[10px] italic">
+                          No custom units nested. Use the top category form to file topic records.
                         </div>
-                      );
-                    })}
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
 
-                    {group.topics.length === 0 && (
-                      <div className="text-center py-6 text-slate-650 text-[10px] italic">
-                        No custom units nested. Use the top category form to file topic records.
-                      </div>
-                    )}
-                  </div>
-                )}
+            {currentSyllabus.length === 0 && (
+              <div className="text-center py-10 bg-[#0A0A0F] border border-white/5 rounded-lg text-slate-500 font-mono">
+                All chronological syllabus paths empty. File some custom categories using the input panel.
               </div>
-            );
-          })}
-
-          {currentSyllabus.length === 0 && (
-            <div className="text-center py-10 bg-[#0A0A0F] border border-white/5 rounded-lg text-slate-500 font-mono">
-              All chronological syllabus paths empty. File some custom categories using the input panel.
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
       </div>

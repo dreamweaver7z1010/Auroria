@@ -7,178 +7,6 @@ import {
 } from "lucide-react";
 import { OnboardingConfig, SubjectConfig, ComponentConfig, SubjectId } from "../types";
 
-export const IGCSE_SUBJECT_PRESETS: SubjectConfig[] = [
-  {
-    name: "Mathematics (0580)",
-    components: [
-      { name: "Paper 2 (Extended)", maxMarks: 70 },
-      { name: "Paper 4 (Extended)", maxMarks: 130 }
-    ],
-    totalMark: 200,
-    totalPaperTarget: 30,
-    yearRangeStart: 2022,
-    yearRangeEnd: 2026,
-    series: ["Feb/March", "May/June", "Oct/Nov"],
-    chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 2 (Extended)", "Paper 4 (Extended)"],
-    completedTopics: []
-  },
-  {
-    name: "Physics (0625)",
-    components: [
-      { name: "Paper 2", maxMarks: 40 },
-      { name: "Paper 4", maxMarks: 80 },
-      { name: "Paper 6", maxMarks: 40 }
-    ],
-    totalMark: 160,
-    totalPaperTarget: 30,
-    yearRangeStart: 2022,
-    yearRangeEnd: 2026,
-    series: ["Feb/March", "May/June", "Oct/Nov"],
-    chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 2", "Paper 4", "Paper 6"],
-    completedTopics: []
-  },
-  {
-    name: "Chemistry (0620)",
-    components: [
-      { name: "Paper 2", maxMarks: 40 },
-      { name: "Paper 4", maxMarks: 80 },
-      { name: "Paper 6", maxMarks: 40 }
-    ],
-    totalMark: 160,
-    totalPaperTarget: 30,
-    yearRangeStart: 2022,
-    yearRangeEnd: 2026,
-    series: ["Feb/March", "May/June", "Oct/Nov"],
-    chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 2", "Paper 4", "Paper 6"],
-    completedTopics: []
-  },
-  {
-    name: "Biology (0610)",
-    components: [
-      { name: "Paper 2", maxMarks: 40 },
-      { name: "Paper 4", maxMarks: 80 },
-      { name: "Paper 6", maxMarks: 40 }
-    ],
-    totalMark: 160,
-    totalPaperTarget: 30,
-    yearRangeStart: 2022,
-    yearRangeEnd: 2026,
-    series: ["Feb/March", "May/June", "Oct/Nov"],
-    chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 2", "Paper 4", "Paper 6"],
-    completedTopics: []
-  },
-  {
-    name: "Computer Science (0478)",
-    components: [
-      { name: "Paper 1: Computer Systems", maxMarks: 75 },
-      { name: "Paper 2: Algorithms, Programming and Logic", maxMarks: 75 }
-    ],
-    totalMark: 150,
-    totalPaperTarget: 30,
-    yearRangeStart: 2022,
-    yearRangeEnd: 2026,
-    series: ["May/June", "Oct/Nov"],
-    chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 1: Computer Systems", "Paper 2: Algorithms, Programming and Logic"],
-    completedTopics: []
-  },
-  {
-    name: "English as a First Language (0500)",
-    components: [
-      { name: "Paper 1: Reading", maxMarks: 80 },
-      { name: "Paper 2: Directed Writing and Composition", maxMarks: 80 }
-    ],
-    totalMark: 160,
-    totalPaperTarget: 20,
-    yearRangeStart: 2022,
-    yearRangeEnd: 2026,
-    series: ["May/June", "Oct/Nov"],
-    chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 1: Reading", "Paper 2: Directed Writing and Composition"],
-    completedTopics: []
-  },
-  {
-    name: "English as a Second Language (0510 / 0511)",
-    components: [
-      { name: "Paper 1: Reading and Writing (Extended)", maxMarks: 60 },
-      { name: "Paper 2: Listening (Extended)", maxMarks: 40 },
-      { name: "Component 3/4: Speaking Test / Speaking Assessment", maxMarks: 30 }
-    ],
-    totalMark: 130,
-    totalPaperTarget: 20,
-    yearRangeStart: 2022,
-    yearRangeEnd: 2026,
-    series: ["May/June", "Oct/Nov"],
-    chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 1: Reading and Writing (Extended)", "Paper 2: Listening (Extended)", "Component 3/4: Speaking Test / Speaking Assessment"],
-    completedTopics: []
-  },
-  {
-    name: "Accounting (0452)",
-    components: [
-      { name: "Paper 1: Multiple Choice", maxMarks: 35 },
-      { name: "Paper 2: Structured Written Paper", maxMarks: 120 }
-    ],
-    totalMark: 155,
-    totalPaperTarget: 30,
-    yearRangeStart: 2022,
-    yearRangeEnd: 2026,
-    series: ["Feb/March", "May/June", "Oct/Nov"],
-    chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 1: Multiple Choice", "Paper 2: Structured Written Paper"],
-    completedTopics: []
-  },
-  {
-    name: "Economics (0455)",
-    components: [
-      { name: "Paper 1: Multiple Choice", maxMarks: 30 },
-      { name: "Paper 2: Structured Written Paper", maxMarks: 90 }
-    ],
-    totalMark: 120,
-    totalPaperTarget: 30,
-    yearRangeStart: 2022,
-    yearRangeEnd: 2026,
-    series: ["Feb/March", "May/June", "Oct/Nov"],
-    chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 1: Multiple Choice", "Paper 2: Structured Written Paper"],
-    completedTopics: []
-  },
-  {
-    name: "Business Studies (0450)",
-    components: [
-      { name: "Paper 1: Short Answer and Data Response", maxMarks: 80 },
-      { name: "Paper 2: Case Study", maxMarks: 80 }
-    ],
-    totalMark: 160,
-    totalPaperTarget: 30,
-    yearRangeStart: 2022,
-    yearRangeEnd: 2026,
-    series: ["Feb/March", "May/June", "Oct/Nov"],
-    chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 1: Short Answer and Data Response", "Paper 2: Case Study"],
-    completedTopics: []
-  },
-  {
-    name: "Psychology (0266)",
-    components: [
-      { name: "Paper 1: Key Studies and Methods", maxMarks: 60 },
-      { name: "Paper 2: Application and Context", maxMarks: 60 }
-    ],
-    totalMark: 120,
-    totalPaperTarget: 30,
-    yearRangeStart: 2022,
-    yearRangeEnd: 2026,
-    series: ["May/June", "Oct/Nov"],
-    chronologicalRule: [2025, 2026, 2024],
-    componentSequence: ["Paper 1: Key Studies and Methods", "Paper 2: Application and Context"],
-    completedTopics: []
-  }
-];
-
 export const AS_SUBJECT_PRESETS: SubjectConfig[] = [
   {
     name: "Physics (9702)",
@@ -487,119 +315,6 @@ export const A_SUBJECT_PRESETS: SubjectConfig[] = [
     completedTopics: []
   }
 ];
-
-export const IGCSE_SYLLABUS_PRESETS: Record<string, { groupA: { name: string; topics: string[] }; groupB: { name: string; topics: string[] } }> = {
-  "Mathematics (0580)": {
-    groupA: {
-      name: "Core Number & Algebra",
-      topics: ["Number", "Algebra and graphs", "Coordinate geometry"]
-    },
-    groupB: {
-      name: "Geometry, Mensuration & Statistics",
-      topics: ["Geometry", "Mensuration", "Trigonometry", "Vectors & transformations", "Probability", "Statistics"]
-    }
-  },
-  "Physics (0625)": {
-    groupA: {
-      name: "Motion, Forces & Energy",
-      topics: ["Physical quantities & measurement", "Motion", "Forces, density and solids", "Momentum", "Energy, work, power", "Pressure"]
-    },
-    groupB: {
-      name: "Thermal, Waves, Electricity & Space",
-      topics: ["Thermal physics", "Waves", "Light", "Electromagnetic spectrum", "Sound", "Electricity & magnetism", "Space physics"]
-    }
-  },
-  "Chemistry (0620)": {
-    groupA: {
-      name: "Atoms, Bonding & Stoichiometry",
-      topics: ["States of matter", "Atoms, elements & compounds", "Stoichiometry", "Electrochemistry", "Chemical energetics"]
-    },
-    groupB: {
-      name: "Reactions & Organic Chemistry",
-      topics: ["Chemical reactions", "Acids, bases & salts", "The Periodic Table", "Metals", "Chemistry of the environment", "Organic chemistry", "Experimental techniques"]
-    }
-  },
-  "Biology (0610)": {
-    groupA: {
-      name: "Cells, Organisms & Nutrition",
-      topics: ["Characteristics & classification", "Organisation of the organism", "Movement into/out of cells", "Biological molecules", "Enzymes", "Plant nutrition", "Human nutrition"]
-    },
-    groupB: {
-      name: "Physiology, Genetics & Ecology",
-      topics: ["Transport in plants", "Transport in animals", "Diseases and immunity", "Gas exchange", "Respiration", "Excretion", "Coordination", "Reproduction", "Inheritance", "Variation", "Ecology"]
-    }
-  },
-  "Computer Science (0478)": {
-    groupA: {
-      name: "Computer Systems",
-      topics: ["Data representation", "Data transmission", "Hardware", "System software", "The internet", "Automated & emerging tech"]
-    },
-    groupB: {
-      name: "Algorithms & Programming",
-      topics: ["Algorithm design & problem-solving", "Programming paradigm", "Databases", "Boolean logic"]
-    }
-  },
-  "English as a First Language (0500)": {
-    groupA: {
-      name: "Reading Foundations",
-      topics: ["Reading comprehension", "Summary writing", "Explicit & implicit meanings", "Writer's effect"]
-    },
-    groupB: {
-      name: "Writing & Composition",
-      topics: ["Directed writing", "Persuasive prose", "Narrative writing", "Descriptive essays"]
-    }
-  },
-  "English as a Second Language (0510 / 0511)": {
-    groupA: {
-      name: "Reading & Writing Skills",
-      topics: ["Skimming and scanning", "Note-taking", "Short answer questions", "Extended articles writing"]
-    },
-    groupB: {
-      name: "Listening & Oral Skills",
-      topics: ["Listening comprehension", "Speaking assessment prompts", "Oral debates", "Pronunciation"]
-    }
-  },
-  "Accounting (0452)": {
-    groupA: {
-      name: "Financial Accounting Bases",
-      topics: ["The fundamentals of accounting", "Sources and recording of data", "Verification of accounting records"]
-    },
-    groupB: {
-      name: "Statements & Principles",
-      topics: ["Accounting procedures", "Preparation of financial statements", "Analysis & interpretation", "Accounting principles"]
-    }
-  },
-  "Economics (0455)": {
-    groupA: {
-      name: "Microeconomics & Markets",
-      topics: ["The basic economic problem", "The allocation of resources", "Microeconomic decision makers"]
-    },
-    groupB: {
-      name: "Macroeconomics & Trade",
-      topics: ["Government & the macroeconomy", "Economic development", "International trade and globalisation"]
-    }
-  },
-  "Business Studies (0450)": {
-    groupA: {
-      name: "Business & Marketing Operations",
-      topics: ["Understanding business activity", "People in business", "Marketing & brand dynamics"]
-    },
-    groupB: {
-      name: "Finance, Management & External Influences",
-      topics: ["Operations management", "Financial information and decisions", "External influences on activity"]
-    }
-  },
-  "Psychology (0266)": {
-    groupA: {
-      name: "Key Social & Cognitive",
-      topics: ["Social influence", "Memory drills", "Attention spans", "Perception limits"]
-    },
-    groupB: {
-      name: "Development & Methods",
-      topics: ["Research methodology", "Biological structures", "Brain scanning diagnostics", "Psychological development"]
-    }
-  }
-};
 
 export const AS_SYLLABUS_PRESETS: Record<string, { groupA: { name: string; topics: string[] }; groupB: { name: string; topics: string[] } }> = {
   "Physics (9702)": {
@@ -1043,7 +758,7 @@ export default function OnboardingWizard({ onComplete, username }: OnboardingWiz
                   <span className="text-xs uppercase font-extrabold block text-slate-500 mb-1">Variant Bracket A</span>
                   <div className="text-md font-bold uppercase tracking-widest text-[#00F0FF]">CIE Board (Pre-configured)</div>
                   <span className="text-xs text-slate-400 block mt-2 leading-relaxed">
-                    Cambridge Assessment International Education (IGCSE, Advanced AS/A levels).
+                    Cambridge Assessment International Education (Advanced AS & A Levels).
                   </span>
                 </button>
               </div>
@@ -1053,20 +768,20 @@ export default function OnboardingWizard({ onComplete, username }: OnboardingWiz
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 bg-[#12121A]/40 p-4 border border-white/5 rounded">
                   <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest block">Available CIE Variant Levels:</span>
                   <div className="flex flex-wrap gap-2">
-                    {["IGCSE", "AS LEVEL", "A LEVEL"].map(v => (
+                    {["AS LEVEL", "A LEVEL", "AS & A LEVEL"].map(v => (
                       <button
                         key={v}
                         onClick={() => {
                           setSubVariant(v);
-                          if (v === "IGCSE") {
-                            setSubjects(IGCSE_SUBJECT_PRESETS);
-                            setCustomSyllabus(IGCSE_SYLLABUS_PRESETS);
-                          } else if (v === "AS LEVEL") {
+                          if (v === "AS LEVEL") {
                             setSubjects(AS_SUBJECT_PRESETS);
                             setCustomSyllabus(AS_SYLLABUS_PRESETS);
                           } else if (v === "A LEVEL") {
                             setSubjects(A_SUBJECT_PRESETS);
                             setCustomSyllabus(A_SYLLABUS_PRESETS);
+                          } else if (v === "AS & A LEVEL") {
+                            setSubjects([...AS_SUBJECT_PRESETS, ...A_SUBJECT_PRESETS]);
+                            setCustomSyllabus({ ...AS_SYLLABUS_PRESETS, ...A_SYLLABUS_PRESETS });
                           }
                         }}
                         className={`px-3 py-1.5 rounded text-xs transition-all uppercase border ${
@@ -1123,14 +838,14 @@ export default function OnboardingWizard({ onComplete, username }: OnboardingWiz
                       <button
                         type="button"
                         onClick={() => {
-                          if (subVariant === "IGCSE") {
-                            setSubjects(IGCSE_SUBJECT_PRESETS);
-                            setCustomSyllabus(IGCSE_SYLLABUS_PRESETS);
-                            alert("Premium CIE IGCSE Study Units and components successfully initialized! Proceed below to customize weights or add targets.");
-                          } else if (subVariant === "A LEVEL") {
+                          if (subVariant === "A LEVEL") {
                             setSubjects(A_SUBJECT_PRESETS);
                             setCustomSyllabus(A_SYLLABUS_PRESETS);
                             alert("Premium CIE A-Level Study Units and components successfully initialized! Proceed below to customize weights or add targets.");
+                          } else if (subVariant === "AS & A LEVEL") {
+                            setSubjects([...AS_SUBJECT_PRESETS, ...A_SUBJECT_PRESETS]);
+                            setCustomSyllabus({ ...AS_SYLLABUS_PRESETS, ...A_SYLLABUS_PRESETS });
+                            alert("Premium CIE AS & A-Level Study Units and components successfully initialized! Proceed below to customize weights or add targets.");
                           } else {
                             setSubjects(AS_SUBJECT_PRESETS);
                             setCustomSyllabus(AS_SYLLABUS_PRESETS);

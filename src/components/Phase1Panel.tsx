@@ -5,7 +5,7 @@ import { SubjectConfig, SubjectId } from "../types";
 
 interface Phase1PanelProps {
   userSubjects: SubjectConfig[];
-  onToggleTopic: (subject: SubjectId, topic: string, completed: boolean) => Promise<void>;
+  onToggleTopic: (subject: SubjectId, topic: string, completed: boolean, phaseId?: number) => Promise<void>;
   loadingToggle: boolean;
   customSyllabus?: Record<string, any>;
   onSaveCustomSyllabus?: (subject: string, syllabusData: any) => Promise<void>;
@@ -72,81 +72,76 @@ export default function Phase1Panel({
           PHASE 1 DAILY THREE-DAY TYPING TEMPLATE (ACTIVE CYCLING)
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          
-          {/* Day Type A */}
-          <div className="border border-[#FFEA00]/20 bg-[#0A0A0F]/80 p-4.5 rounded-xl space-y-3 relative overflow-hidden transition-all hover:border-[#FFEA00]/40">
-            <div className="absolute top-0 right-0 w-8 h-8 bg-[#FFEA00]/5 rounded-bl-3xl" />
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-[#FFEA00]/10 text-[#FFEA00] border border-[#FFEA00]/25 text-[10px] font-black flex items-center justify-center">A</span>
-              <span className="text-[11px] font-black text-slate-100 uppercase">Day Type A // Core Heavy</span>
-            </div>
-            
-            <div className="space-y-2 text-[11px] font-mono">
-              <div className="p-2 border border-white/5 bg-[#12121A]/80 rounded text-slate-350">
-                <span className="text-[#00F0FF] font-bold block">Chemistry</span>
-                <span className="text-[9.5px]">Physical Chemistry / Organic Chapters Drill</span>
-              </div>
-              <div className="p-2 border border-white/5 bg-[#12121A]/80 rounded text-slate-350">
-                <span className="text-purple-400 font-bold block">Mathematics</span>
-                <span className="text-[9.5px]">Pure Mathematics (Paper 1) Foundations</span>
-              </div>
-              <div className="p-2 border border-white/5 bg-[#12121A]/80 rounded text-slate-350">
-                <span className="text-[#FF0055] font-bold block">English General Paper</span>
-                <span className="text-[9.5px]">Core Structural Skills & Paper 1 Essay writing</span>
-              </div>
-            </div>
-          </div>
+        {(() => {
+          const names = userSubjects.map(s => s.name);
+          const dayA = names.filter((_, idx) => idx % 3 === 0);
+          const dayB = names.filter((_, idx) => idx % 3 === 1);
+          const dayC = names.filter((_, idx) => idx % 3 === 2);
 
-          {/* Day Type B */}
-          <div className="border border-purple-500/20 bg-[#0A0A0F]/80 p-4.5 rounded-xl space-y-3 relative overflow-hidden transition-all hover:border-purple-500/40">
-            <div className="absolute top-0 right-0 w-8 h-8 bg-purple-500/5 rounded-bl-3xl" />
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/25 text-[10px] font-black flex items-center justify-center">B</span>
-              <span className="text-[11px] font-black text-slate-100 uppercase">Day Type B // Logic & Mechanics</span>
-            </div>
-            
-            <div className="space-y-2 text-[11px] font-mono">
-              <div className="p-2 border border-white/5 bg-[#12121A]/80 rounded text-slate-350">
-                <span className="text-[#00FF66] font-bold block">Physics</span>
-                <span className="text-[9.5px]">Mechanics & Physical quant boundaries</span>
-              </div>
-              <div className="p-2 border border-white/5 bg-[#12121A]/80 rounded text-slate-350">
-                <span className="text-pink-400 font-bold block">Computer Science</span>
-                <span className="text-[9.5px]">Theory & Logical software fundamentals</span>
-              </div>
-              <div className="p-2 border border-white/5 bg-[#12121A]/80 rounded text-slate-350">
-                <span className="text-purple-400 font-bold block">Mathematics</span>
-                <span className="text-[9.5px]">Probability & Statistics 1 (Paper 5) Units</span>
-              </div>
-            </div>
-          </div>
+          const getListForDay = (arr: string[], fallbackIdx: number) => {
+            if (arr.length > 0) return arr;
+            return names[fallbackIdx % names.length] ? [names[fallbackIdx % names.length]] : [];
+          };
 
-          {/* Day Type C */}
-          <div className="border border-pink-500/20 bg-[#0A0A0F]/80 p-4.5 rounded-xl space-y-3 relative overflow-hidden transition-all hover:border-pink-500/40">
-            <div className="absolute top-0 right-0 w-8 h-8 bg-pink-500/5 rounded-bl-3xl" />
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-pink-500/10 text-pink-400 border border-pink-500/25 text-[10px] font-black flex items-center justify-center">C</span>
-              <span className="text-[11px] font-black text-slate-100 uppercase">Day Type C // Inorganic & Waves</span>
-            </div>
-            
-            <div className="space-y-2 text-[11px] font-mono">
-              <div className="p-2 border border-white/5 bg-[#12121A]/80 rounded text-slate-350">
-                <span className="text-[#00F0FF] font-bold block">Chemistry</span>
-                <span className="text-[9.5px]">Inorganic periodicity, Groups 2 & 17</span>
-              </div>
-              <div className="p-2 border border-white/5 bg-[#12121A]/80 rounded text-slate-350">
-                <span className="text-[#00FF66] font-bold block">Physics</span>
-                <span className="text-[9.5px]">Modern Waves, Superposition & Electricity</span>
-              </div>
-              <div className="p-2 border border-white/5 bg-[#12121A]/80 rounded text-slate-350">
-                <span className="text-[#FF0055] font-bold block">English General Paper</span>
-                <span className="text-[9.5px]">Comprehension practice & Topic content banks</span>
-              </div>
-            </div>
-          </div>
+          const listA = getListForDay(dayA, 0);
+          const listB = getListForDay(dayB, 1);
+          const listC = getListForDay(dayC, 2);
 
-        </div>
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Day Type A */}
+              <div className="border border-[#FFEA00]/20 bg-[#0A0A0F]/80 p-4.5 rounded-xl space-y-3 relative overflow-hidden transition-all hover:border-[#FFEA00]/40">
+                <div className="absolute top-0 right-0 w-8 h-8 bg-[#FFEA00]/5 rounded-bl-3xl" />
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#FFEA00]/10 text-[#FFEA00] border border-[#FFEA00]/25 text-[10px] font-black flex items-center justify-center">A</span>
+                  <span className="text-[11px] font-black text-slate-100 uppercase">Day Type A // Foundation Core</span>
+                </div>
+                <div className="space-y-2 text-[11px] font-mono">
+                  {listA.map((sub, i) => (
+                    <div key={i} className="p-2 border border-white/5 bg-[#12121A]/80 rounded text-slate-350">
+                      <span className="text-[#00F0FF] font-bold block">{sub}</span>
+                      <span className="text-[9.5px]">Core Theoretical Foundations & Chapter Drills</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Day Type B */}
+              <div className="border border-purple-500/20 bg-[#0A0A0F]/80 p-4.5 rounded-xl space-y-3 relative overflow-hidden transition-all hover:border-purple-500/40">
+                <div className="absolute top-0 right-0 w-8 h-8 bg-purple-500/5 rounded-bl-3xl" />
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/25 text-[10px] font-black flex items-center justify-center">B</span>
+                  <span className="text-[11px] font-black text-slate-100 uppercase">Day Type B // Applied Concepts</span>
+                </div>
+                <div className="space-y-2 text-[11px] font-mono">
+                  {listB.map((sub, i) => (
+                    <div key={i} className="p-2 border border-white/5 bg-[#12121A]/80 rounded text-slate-350">
+                      <span className="text-purple-400 font-bold block">{sub}</span>
+                      <span className="text-[9.5px]">Topical Exercises & Problem Solving Units</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Day Type C */}
+              <div className="border border-pink-500/20 bg-[#0A0A0F]/80 p-4.5 rounded-xl space-y-3 relative overflow-hidden transition-all hover:border-pink-500/40">
+                <div className="absolute top-0 right-0 w-8 h-8 bg-pink-500/5 rounded-bl-3xl" />
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-pink-500/10 text-pink-400 border border-pink-500/25 text-[10px] font-black flex items-center justify-center">C</span>
+                  <span className="text-[11px] font-black text-slate-100 uppercase">Day Type C // Synthesis & Revision</span>
+                </div>
+                <div className="space-y-2 text-[11px] font-mono">
+                  {listC.map((sub, i) => (
+                    <div key={i} className="p-2 border border-white/5 bg-[#12121A]/80 rounded text-slate-350">
+                      <span className="text-[#00FF66] font-bold block">{sub}</span>
+                      <span className="text-[9.5px]">Flashcards & Comprehensive Topic Reviews</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Embedded Dynamic Syllabus Checklist tracker */}
@@ -163,6 +158,7 @@ export default function Phase1Panel({
           customSyllabus={customSyllabus}
           onSaveCustomSyllabus={onSaveCustomSyllabus}
           showTitle={false}
+          phaseId={1}
         />
       </div>
 

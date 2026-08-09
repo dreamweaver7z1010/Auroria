@@ -5,7 +5,11 @@ import fs from "fs";
 import crypto from "crypto";
 import { WebSocketServer, WebSocket } from "ws";
 import { createServer as createViteServer } from "vite";
+import { GoogleGenAI } from "@google/genai";
 import { TestAnalytics, MistakeVault, DaySchedule, SubjectId, OnboardingConfig } from "./src/types";
+import { requireAuth, AuthRequest } from "./src/middleware/auth.ts";
+import { getOrCreateUser } from "./src/db/users.ts";
+import { getUserTaskItems, upsertTaskItem, deleteTaskItemByGoogleId, getUserStudyData, saveUserStudyData } from "./src/db/tasks.ts";
 
 // Security Helper: Hashing
 function createSalt(): string {
@@ -205,8 +209,26 @@ async function startServer() {
     saveDB(db);
   }
 
-  // Session token mapping
-  const tokenStore = new Map<string, string>(); // token -> username
+  // Session token mapping helper (persistent in DB)
+  const tokenStore = {
+    get(token: string): string | undefined {
+      db = loadDB();
+      db.tokens = db.tokens || {};
+      return db.tokens[token];
+    },
+    set(token: string, username: string) {
+      db = loadDB();
+      db.tokens = db.tokens || {};
+      db.tokens[token] = username;
+      saveDB(db);
+    },
+    delete(token: string) {
+      db = loadDB();
+      db.tokens = db.tokens || {};
+      delete db.tokens[token];
+      saveDB(db);
+    }
+  };
 
   // Default syllabus topics library mapped to Subject Groups
   const defaultSyllabus: Record<SubjectId, { groupA: { name: string; topics: string[] }; groupB: { name: string; topics: string[] } }> = {
@@ -406,19 +428,31 @@ async function startServer() {
   // Dynamic schedule generator matching Day cycles and Syllabus groups
   function getRotationSchedule(phaseId: number, user: any): DaySchedule[] {
     const config = user.config;
-    const completedList = new Set(user.config?.subjects?.flatMap((s: any) => s.completedTopics || []) || []);
+    const enrolledSubjects = user.config?.subjects || [];
+    const completedList = new Set(enrolledSubjects.flatMap((s: any) => s.completedTopics || []) || []);
 
-    // Helper to find first uncompleted topic
-    function getTopic(subj: SubjectId, firstGroup: boolean): string {
-      const g = (config && config.customSyllabus && config.customSyllabus[subj]) || defaultSyllabus[subj];
-      if (!g) return "Review Core Textbook";
+    if (enrolledSubjects.length === 0) {
+      return [
+        {
+          dayName: "DAY TYPE A",
+          dayType: "A",
+          subjects: [],
+          targets: "No enrolled subjects detected. Add subjects in profile."
+        }
+      ];
+    }
+
+    // Helper to find first uncompleted topic for a given subject object or name
+    function getTopicForSubject(subjObj: any, firstGroup: boolean): string {
+      const sName = typeof subjObj === 'string' ? subjObj : subjObj.name;
+      const g = (config && config.customSyllabus && config.customSyllabus[sName]) || defaultSyllabus[sName];
+      if (!g) return `${sName} -> Review Core Specs`;
       
       let targetList: string[] = [];
       if (Array.isArray(g)) {
         if (firstGroup) {
           targetList = g[0]?.topics || [];
         } else {
-          // Fall back to subsequent groups if available, otherwise first group
           targetList = (g[1] || g[0])?.topics || [];
         }
       } else {
@@ -426,119 +460,90 @@ async function startServer() {
       }
       
       const uncompleted = targetList.find(t => !completedList.has(t));
-      return uncompleted ? `Topic: ${uncompleted}` : `[ALL TOPICS ARCHIVED]`;
+      return uncompleted ? `${sName}: ${uncompleted}` : `${sName}: [ALL TOPICS ARCHIVED]`;
     }
 
+    const sNames = enrolledSubjects.map((s: any) => s.name);
+
     if (phaseId === 1) {
-      // 3-Day operational cycle
+      // 3-Day operational cycle dynamically partitioned over enrolled subjects
+      const sub1 = sNames[0] || "General";
+      const sub2 = sNames[1] || sub1;
+      const sub3 = sNames[2] || sub2;
+
       return [
         {
           dayName: "DAY TYPE A",
           dayType: "A",
-          subjects: ["Chemistry", "Math", "English"],
-          targets: `Chemistry -> ${getTopic("Chemistry", true)} // Math -> ${getTopic("Math", true)} // English -> ${getTopic("English", true)}`
+          subjects: [sub1, sub2],
+          targets: `${getTopicForSubject(sub1, true)} // ${getTopicForSubject(sub2, true)}`
         },
         {
           dayName: "DAY TYPE B",
           dayType: "B",
-          subjects: ["Physics", "Computer Science", "Math"],
-          targets: `Physics -> ${getTopic("Physics", true)} // Computer Science -> ${getTopic("Computer Science", false)} // Math -> ${getTopic("Math", false)}`
+          subjects: [sub2, sub3],
+          targets: `${getTopicForSubject(sub2, false)} // ${getTopicForSubject(sub3, true)}`
         },
         {
           dayName: "DAY TYPE C",
           dayType: "C",
-          subjects: ["Chemistry", "Physics", "English"],
-          targets: `Chemistry -> ${getTopic("Chemistry", false)} // Physics -> ${getTopic("Physics", false)} // English -> ${getTopic("English", false)}`
+          subjects: [sub1, sub3],
+          targets: `${getTopicForSubject(sub1, false)} // ${getTopicForSubject(sub3, false)}`
         }
       ];
     } else if (phaseId === 2) {
-      // 5-Day horizontal rotational active recall layout tracks topics
+      // 5-Day horizontal rotational active recall layout
       return [
         {
           dayName: "DAY BLOCK 1",
           dayType: "D1",
-          subjects: ["Chemistry", "Math", "English"],
-          targets: `Recall drill: ${getTopic("Chemistry", true)} // ${getTopic("Math", true)}`
+          subjects: sNames.slice(0, 2),
+          targets: `Recall drill: ${getTopicForSubject(sNames[0] || "General", true)}`
         },
         {
           dayName: "DAY BLOCK 2",
           dayType: "D2",
-          subjects: ["Physics", "Computer Science", "Math"],
-          targets: `Recall drill: ${getTopic("Physics", true)} // ${getTopic("Computer Science", false)}`
+          subjects: sNames.slice(1, 3),
+          targets: `Recall drill: ${getTopicForSubject(sNames[1] || sNames[0] || "General", true)}`
         },
         {
           dayName: "DAY BLOCK 3",
           dayType: "D3",
-          subjects: ["Chemistry", "Physics", "English"],
-          targets: `Recall drill: ${getTopic("Chemistry", false)} // ${getTopic("English", true)}`
+          subjects: sNames.slice(0, 3),
+          targets: `Recall drill: ${getTopicForSubject(sNames[2] || sNames[0] || "General", false)}`
         },
         {
           dayName: "DAY BLOCK 4",
           dayType: "D4",
-          subjects: ["Computer Science", "Math", "English"],
-          targets: `Recall drill: ${getTopic("Computer Science", true)} // ${getTopic("Math", false)}`
+          subjects: sNames.slice(1, 4),
+          targets: `Recall drill: ${getTopicForSubject(sNames[0] || "General", false)}`
         },
         {
           dayName: "DAY BLOCK 5",
           dayType: "D5",
-          subjects: ["Chemistry", "Computer Science", "Physics"],
-          targets: `Recall drill: ${getTopic("Chemistry", true)} // ${getTopic("Physics", false)}`
+          subjects: sNames,
+          targets: `Full recall integration drill across all enrolled subjects`
         }
       ];
     } else {
       // Phase 3 Past Paper High intensity cycle
-      const chemCfg = config?.subjects?.find((s: any) => s.name === "Chemistry");
-      const csCfg = config?.subjects?.find((s: any) => s.name === "Computer Science");
-      const mathCfg = config?.subjects?.find((s: any) => s.name === "Math");
-      const physCfg = config?.subjects?.find((s: any) => s.name === "Physics");
-      const engCfg = config?.subjects?.find((s: any) => s.name === "English");
+      const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+      const dayCodes = ["PA", "PB", "PC", "PD", "PE", "PM1", "PM2"];
 
-      return [
-        { 
-          dayName: "MONDAY", 
-          dayType: "PA", 
-          subjects: ["Computer Science", "Math"], 
-          targets: `[SIM_LOAD]: ${csCfg ? generatePastPaperTask(csCfg, 0) : "CS paper"} // ${mathCfg ? generatePastPaperTask(mathCfg, 0) : "Math paper"}` 
-        },
-        { 
-          dayName: "TUESDAY", 
-          dayType: "PB", 
-          subjects: ["Chemistry", "Physics"], 
-          targets: `[SIM_LOAD]: ${chemCfg ? generatePastPaperTask(chemCfg, 0) : "Chem paper"} // ${physCfg ? generatePastPaperTask(physCfg, 0) : "Phys paper"}` 
-        },
-        { 
-          dayName: "WEDNESDAY", 
-          dayType: "PC", 
-          subjects: ["Math", "English"], 
-          targets: `[SIM_LOAD]: ${mathCfg ? generatePastPaperTask(mathCfg, 1) : "Math paper"} // ${engCfg ? generatePastPaperTask(engCfg, 0) : "Eng paper"}` 
-        },
-        { 
-          dayName: "THURSDAY", 
-          dayType: "PD", 
-          subjects: ["Computer Science", "Physics"], 
-          targets: `[SIM_LOAD]: ${csCfg ? generatePastPaperTask(csCfg, 1) : "CS paper"} // ${physCfg ? generatePastPaperTask(physCfg, 1) : "Phys paper"}` 
-        },
-        { 
-          dayName: "FRIDAY", 
-          dayType: "PE", 
-          subjects: ["Chemistry", "English"], 
-          targets: `[SIM_LOAD]: ${chemCfg ? generatePastPaperTask(chemCfg, 1) : "Chem paper"} // ${engCfg ? generatePastPaperTask(engCfg, 1) : "Eng paper"}` 
-        },
-        { 
-          dayName: "SATURDAY", 
-          dayType: "PM1", 
-          subjects: ["Chemistry", "Physics", "Math", "Computer Science"], 
-          targets: `4 EXAMS MAX: ${chemCfg ? generatePastPaperTask(chemCfg, 2) : "Chem"} // ${physCfg ? generatePastPaperTask(physCfg, 2) : "Phys"} // ${mathCfg ? generatePastPaperTask(mathCfg, 2) : "Math"}`, 
-          extraFlag: "MAX_LOAD" 
-        },
-        { 
-          dayName: "SUNDAY", 
-          dayType: "PM2", 
-          subjects: ["Chemistry", "Physics", "Math", "English"], 
-          targets: `4 EXAMS MAX: ${chemCfg ? generatePastPaperTask(chemCfg, 3) : "Chem"} // ${physCfg ? generatePastPaperTask(physCfg, 3) : "Phys"} // ${mathCfg ? generatePastPaperTask(mathCfg, 3) : "Math"}`, 
-          extraFlag: "MAX_LOAD" 
-        }
-      ];
+      return days.map((dayName, idx) => {
+        const primarySubjObj = enrolledSubjects[idx % enrolledSubjects.length];
+        const secondarySubjObj = enrolledSubjects[(idx + 1) % enrolledSubjects.length];
+        const task1 = generatePastPaperTask(primarySubjObj, idx);
+        const task2 = generatePastPaperTask(secondarySubjObj, idx + 1);
+
+        return {
+          dayName,
+          dayType: dayCodes[idx],
+          subjects: [primarySubjObj.name, secondarySubjObj.name].filter((v, i, a) => a.indexOf(v) === i),
+          targets: `[PAST PAPER RUNTIME]: ${task1} // ${task2}`,
+          extraFlag: idx >= 5 ? "MAX_LOAD" : undefined
+        };
+      });
     }
   }
 
@@ -683,6 +688,307 @@ async function startServer() {
       tokenStore.delete(token);
     }
     res.json({ success: true, message: "Logged out successfully" });
+  });
+
+  // Password Recovery - Request Reset
+  app.post("/api/auth/forgot-password", (req, res) => {
+    try {
+      const { usernameOrEmail } = req.body;
+      if (!usernameOrEmail) {
+        return res.status(400).json({ error: "Username or Email is required for password recovery" });
+      }
+
+      db = loadDB();
+      const targetKey = usernameOrEmail.trim().toLowerCase();
+      
+      let matchedUser = Object.values(db.users || {}).find(
+        (u: any) => u.username?.toLowerCase() === targetKey || u.email?.toLowerCase() === targetKey
+      ) as any;
+
+      if (!matchedUser) {
+        return res.status(404).json({ error: "No student profile found with provided identity credential" });
+      }
+
+      const resetToken = crypto.randomBytes(16).toString("hex");
+      matchedUser.resetToken = resetToken;
+      db.users[matchedUser.username] = matchedUser;
+      saveDB(db);
+
+      res.json({
+        success: true,
+        message: `Security clearance token generated for ${matchedUser.username}! Verification link dispatched.`,
+        resetToken,
+        username: matchedUser.username
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Password recovery process failed" });
+    }
+  });
+
+  // Password Recovery - Reset Password
+  app.post("/api/auth/reset-password", (req, res) => {
+    try {
+      const { username, newPassword } = req.body;
+      if (!username || !newPassword) {
+        return res.status(400).json({ error: "Username and new password are required" });
+      }
+
+      db = loadDB();
+      const targetUser = username.trim().toLowerCase();
+      const user = db.users[targetUser];
+
+      if (!user) {
+        return res.status(404).json({ error: "User profile not found" });
+      }
+
+      const salt = createSalt();
+      const passwordHash = hashPassword(newPassword, salt);
+      user.salt = salt;
+      user.passwordHash = passwordHash;
+      user.resetToken = undefined;
+
+      db.users[targetUser] = user;
+      saveDB(db);
+
+      res.json({
+        success: true,
+        message: "Password updated successfully! Redirecting to login portal..."
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed resetting password" });
+    }
+  });
+
+  // Google OAuth Verification Flow Simulation
+  app.post("/api/auth/google-oauth", (req, res) => {
+    try {
+      const { email, name } = req.body;
+      const targetEmail = (email || "student.cie@gmail.com").trim().toLowerCase();
+      const targetName = name || "CIE Student Candidate";
+      const targetUsername = targetEmail.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "_");
+
+      db = loadDB();
+      db.users = db.users || {};
+
+      let existingUser = Object.values(db.users).find((u: any) => u.email?.toLowerCase() === targetEmail) as any;
+
+      if (!existingUser) {
+        const salt = createSalt();
+        const passwordHash = hashPassword("OAuthPass123!", salt);
+        existingUser = {
+          username: targetUsername,
+          name: targetName,
+          email: targetEmail,
+          salt,
+          passwordHash,
+          onboarded: false,
+          config: null,
+          testAnalytics: [],
+          mistakeVault: [],
+          userResources: [],
+          currentOverrideState: null
+        };
+        db.users[targetUsername] = existingUser;
+        saveDB(db);
+      }
+
+      const sessionToken = crypto.randomBytes(32).toString("hex");
+      tokenStore.set(sessionToken, existingUser.username);
+
+      res.json({
+        success: true,
+        token: sessionToken,
+        user: {
+          username: existingUser.username,
+          onboarded: existingUser.onboarded
+        }
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Google OAuth verification process failed" });
+    }
+  });
+
+  // Live Profile Details Manager - Update username, academic level (AS/A Level), and enrolled subjects
+  app.post("/api/profile/update-details", authenticateToken, (req: any, res) => {
+    try {
+      const { username: newUsername, subVariant, subjects } = req.body;
+      const currentUsername = req.user.username;
+
+      db = loadDB();
+      const user = db.users[currentUsername];
+      if (!user) {
+        return res.status(404).json({ error: "User profile not found" });
+      }
+
+      let updatedUsername = currentUsername;
+
+      // Handle Username Change if provided and different
+      if (newUsername && newUsername.trim().toLowerCase() !== currentUsername.toLowerCase()) {
+        const trimmedNew = newUsername.trim().toLowerCase();
+        if (trimmedNew.length < 3) {
+          return res.status(400).json({ error: "Username must be at least 3 characters long" });
+        }
+        if (db.users[trimmedNew]) {
+          return res.status(400).json({ error: "Username is already taken by another student" });
+        }
+
+        // Migrate user record key
+        delete db.users[currentUsername];
+        user.username = trimmedNew;
+        db.users[trimmedNew] = user;
+        updatedUsername = trimmedNew;
+
+        // Update active session tokens
+        if (db.tokens) {
+          for (const tokenKey of Object.keys(db.tokens)) {
+            if (db.tokens[tokenKey] === currentUsername) {
+              db.tokens[tokenKey] = trimmedNew;
+            }
+          }
+        }
+      }
+
+      if (!user.config) {
+        user.config = {
+          board: "CIE",
+          subVariant: subVariant || "AS LEVEL",
+          schoolStartDate: "2026-06-01",
+          revisionStartDate: "2026-10-01",
+          boardExamDate: "2026-11-20",
+          subjects: subjects || []
+        };
+      } else {
+        if (subVariant) user.config.subVariant = subVariant;
+        if (Array.isArray(subjects)) user.config.subjects = subjects;
+      }
+
+      saveDB(db);
+
+      const calcPhase = calculateSystemPhase(user.config);
+      const activePhase = user.currentOverrideState !== null ? user.currentOverrideState : calcPhase;
+      const rotation = getRotationSchedule(activePhase, user);
+
+      // Broadcast update
+      broadcastUpdate(updatedUsername, {
+        type: "SYNC_ONBOARDING",
+        user,
+        schedule: rotation
+      });
+
+      res.json({
+        success: true,
+        username: updatedUsername,
+        config: user.config,
+        schedule: rotation
+      });
+    } catch (err: any) {
+      console.error("Failed updating profile details:", err);
+      res.status(500).json({ error: "Failed updating profile details" });
+    }
+  });
+
+  // Security - Change Password API Endpoint
+  app.post("/api/profile/change-password", authenticateToken, (req: any, res) => {
+    try {
+      const { oldPassword, newPassword, confirmPassword } = req.body;
+      const activeUser = req.user.username;
+
+      if (!oldPassword || !newPassword || !confirmPassword) {
+        return res.status(400).json({ error: "Old password, new password, and confirmation are strictly required" });
+      }
+
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ error: "New password and confirmation password do not match" });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: "New password must be at least 6 characters long" });
+      }
+
+      db = loadDB();
+      const user = db.users[activeUser];
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Verify Old Password
+      const oldHash = hashPassword(oldPassword, user.salt);
+      if (oldHash !== user.passwordHash) {
+        return res.status(401).json({ error: "Current password entered is incorrect" });
+      }
+
+      // Re-hash with fresh salt
+      const newSalt = createSalt();
+      const newHash = hashPassword(newPassword, newSalt);
+
+      user.salt = newSalt;
+      user.passwordHash = newHash;
+      db.users[activeUser] = user;
+      saveDB(db);
+
+      res.json({
+        success: true,
+        message: "Your password has been changed successfully!"
+      });
+    } catch (err: any) {
+      console.error("Change password error:", err);
+      res.status(500).json({ error: "Failed updating password" });
+    }
+  });
+
+  // User Cloud Resource Drive GET
+  app.get("/api/resources/user-drive", authenticateToken, (req: any, res) => {
+    const resources = req.user.userResources || [];
+    res.json(resources);
+  });
+
+  // User Cloud Resource Drive POST (Upload/Add resource)
+  app.post("/api/resources/user-drive", authenticateToken, (req: any, res) => {
+    try {
+      const { title, subject, category, url, notes, fileData } = req.body;
+      const activeUser = req.user.username;
+
+      if (!title || !subject) {
+        return res.status(400).json({ error: "Title and Subject are required" });
+      }
+
+      const newResource = {
+        id: "res_" + Date.now(),
+        title,
+        subject,
+        category: category || "Notes",
+        url: url || "",
+        notes: notes || "",
+        fileData: fileData || undefined,
+        dateAdded: new Date().toISOString().split("T")[0]
+      };
+
+      db = loadDB();
+      db.users[activeUser].userResources = db.users[activeUser].userResources || [];
+      db.users[activeUser].userResources.unshift(newResource);
+      saveDB(db);
+
+      res.status(201).json(newResource);
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed saving user resource" });
+    }
+  });
+
+  // User Cloud Resource Drive DELETE
+  app.delete("/api/resources/user-drive/:id", authenticateToken, (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const activeUser = req.user.username;
+
+      db = loadDB();
+      const list = db.users[activeUser].userResources || [];
+      db.users[activeUser].userResources = list.filter((r: any) => r.id !== id);
+      saveDB(db);
+
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed deleting resource" });
+    }
   });
 
   // Onboarding Wizard Configuration Save
@@ -832,6 +1138,28 @@ async function startServer() {
     }
   });
 
+  // Delete/Remove Test Result
+  app.delete("/api/analytics/test/:id", authenticateToken, (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const targetUser = req.user.username;
+
+      db = loadDB();
+      const analytics = db.users[targetUser].testAnalytics || [];
+      const newAnalytics = analytics.filter((t: any) => t.id !== id);
+      db.users[targetUser].testAnalytics = newAnalytics;
+      saveDB(db);
+
+      // Broadcast update to real-time clients!
+      broadcastUpdate(targetUser, { type: "REFRESH_ANALYTICS", data: newAnalytics });
+
+      res.status(200).json({ success: true, message: "Test log deleted successfully" });
+    } catch (error: any) {
+      console.error("Failed deleting test log:", error);
+      res.status(500).json({ error: "Failed deleting test log" });
+    }
+  });
+
   // Mistake Notebook Vault GET
   app.get("/api/mistakes", authenticateToken, (req: any, res) => {
     res.json(req.user.mistakeVault || []);
@@ -899,10 +1227,10 @@ async function startServer() {
     }
   });
 
-  // Topic Completion Toggles
+  // Topic Completion Toggles (Phase-Independent)
   app.post("/api/topics/toggle", authenticateToken, (req: any, res) => {
     try {
-      const { subject, topic, completed } = req.body;
+      const { subject, topic, completed, phaseId } = req.body;
       const targetUser = req.user.username;
 
       if (!subject || !topic) {
@@ -917,19 +1245,28 @@ async function startServer() {
         return res.status(400).json({ error: "Subject config not configured yet" });
       }
 
-      let completedTopics: string[] = subjectsList[sIndex].completedTopics || [];
+      const pKey = phaseId ? `completedTopics_phase${phaseId}` : "completedTopics";
+      let phaseTopics: string[] = subjectsList[sIndex][pKey] || (phaseId ? [] : (subjectsList[sIndex].completedTopics || []));
+      
       if (completed) {
-        if (!completedTopics.includes(topic)) {
-          completedTopics.push(topic);
+        if (!phaseTopics.includes(topic)) {
+          phaseTopics.push(topic);
         }
       } else {
-        completedTopics = completedTopics.filter((t: string) => t !== topic);
+        phaseTopics = phaseTopics.filter((t: string) => t !== topic);
       }
 
-      db.users[targetUser].config.subjects[sIndex].completedTopics = completedTopics;
+      subjectsList[sIndex][pKey] = phaseTopics;
+
+      // Also ensure completedTopics has legacy list if phaseId wasn't passed or sync fallback
+      if (!phaseId) {
+        subjectsList[sIndex].completedTopics = phaseTopics;
+      }
+
+      db.users[targetUser].config.subjects[sIndex] = subjectsList[sIndex];
       saveDB(db);
 
-      // Since completed topics changed, recalculate the dynamic calendar and reload on all boards!
+      // Recalculate dynamic calendar and broadcast update
       const activeUserObj = db.users[targetUser];
       const calcPhase = calculateSystemPhase(activeUserObj.config);
       const activePhase = activeUserObj.currentOverrideState !== null ? activeUserObj.currentOverrideState : calcPhase;
@@ -952,6 +1289,255 @@ async function startServer() {
       });
     } catch (err) {
       res.status(500).json({ error: "Failure toggled topic alignment" });
+    }
+  });
+
+  // Focus Sessions API Endpoints
+  app.get("/api/focus-sessions", authenticateToken, (req: any, res) => {
+    res.json(req.user.focusSessions || []);
+  });
+
+  app.post("/api/focus-sessions", authenticateToken, (req: any, res) => {
+    try {
+      const { subject, durationMinutes, notes, preset } = req.body;
+      const targetUser = req.user.username;
+
+      if (!subject || !durationMinutes) {
+        return res.status(400).json({ error: "Subject and durationMinutes are required" });
+      }
+
+      const newSession = {
+        id: "session_" + Date.now(),
+        subject,
+        durationMinutes: Number(durationMinutes),
+        notes: notes || "",
+        preset: preset || "25m",
+        completedAt: new Date().toISOString()
+      };
+
+      db = loadDB();
+      db.users[targetUser].focusSessions = db.users[targetUser].focusSessions || [];
+      db.users[targetUser].focusSessions.unshift(newSession);
+      saveDB(db);
+
+      broadcastUpdate(targetUser, {
+        type: "REFRESH_FOCUS_SESSIONS",
+        data: db.users[targetUser].focusSessions
+      });
+
+      res.status(201).json(newSession);
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to record focus session" });
+    }
+  });
+
+  app.delete("/api/focus-sessions/:id", authenticateToken, (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const targetUser = req.user.username;
+
+      db = loadDB();
+      const list = db.users[targetUser].focusSessions || [];
+      db.users[targetUser].focusSessions = list.filter((s: any) => s.id !== id);
+      saveDB(db);
+
+      broadcastUpdate(targetUser, {
+        type: "REFRESH_FOCUS_SESSIONS",
+        data: db.users[targetUser].focusSessions
+      });
+
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to delete focus session" });
+    }
+  });
+
+  // Initialize Google Gen AI client with telemetry user-agent header
+  const ai = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY,
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+      }
+    }
+  });
+
+  // GEMINI AI INTEGRATION ROUTES
+
+  // Multi-turn Chat Route
+  app.post("/api/gemini/chat", async (req, res) => {
+    try {
+      const { messages, systemInstruction, model } = req.body;
+      const targetModel = model || "gemini-3.6-flash";
+      
+      const defaultSysInst = "You are Saber AI, an elite CIE AS & A Level exam prep tutor and academic coach for Cambridge subjects (Physics 9702, Chemistry 9701, Mathematics 9709, Computer Science 9618, Biology 9700, English General Paper 8021). You deliver precise mark-scheme standard answers, step-by-step problem derivations, clear conceptual explanations, and exam strategies.";
+
+      const formattedContents = (messages || []).map((m: any) => ({
+        role: m.role === "assistant" ? "model" : m.role || "user",
+        parts: [{ text: m.text || m.content || "" }]
+      }));
+
+      if (formattedContents.length === 0) {
+        return res.status(400).json({ error: "Messages array cannot be empty" });
+      }
+
+      const response = await ai.models.generateContent({
+        model: targetModel,
+        contents: formattedContents,
+        config: {
+          systemInstruction: systemInstruction || defaultSysInst,
+        }
+      });
+
+      const replyText = response.text || "No response generated from Gemini AI.";
+      res.json({ text: replyText, model: targetModel });
+    } catch (err: any) {
+      console.error("[Gemini Chat API Error]:", err);
+      res.status(500).json({ 
+        error: err.message || "Failed to generate AI chat response",
+        details: err.toString()
+      });
+    }
+  });
+
+  // Image Analysis Route
+  app.post("/api/gemini/analyze-image", async (req, res) => {
+    try {
+      const { imageBase64, mimeType, prompt, model } = req.body;
+
+      if (!imageBase64) {
+        return res.status(400).json({ error: "imageBase64 payload is required" });
+      }
+
+      const targetModel = model || "gemini-3.1-pro-preview";
+      const userPrompt = prompt || "Analyze this academic image in detail. If it's a past paper question, provide a step-by-step mark scheme solution. If it's handwritten notes or a diagram, explain the concepts and point out any errors.";
+
+      const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+      const cleanMime = mimeType || "image/png";
+
+      const imagePart = {
+        inlineData: {
+          mimeType: cleanMime,
+          data: cleanBase64,
+        },
+      };
+
+      const textPart = {
+        text: userPrompt,
+      };
+
+      const response = await ai.models.generateContent({
+        model: targetModel,
+        contents: { parts: [imagePart, textPart] },
+        config: {
+          systemInstruction: "You are an expert Cambridge CIE exam examiner and vision analyzer. Analyze diagrams, handwritten working out, graphs, past paper snippets, and formulas with high precision.",
+        }
+      });
+
+      const replyText = response.text || "No image analysis response received from Gemini.";
+      res.json({ text: replyText, model: targetModel });
+    } catch (err: any) {
+      console.error("[Gemini Image Analysis Error]:", err);
+      res.status(500).json({ 
+        error: err.message || "Failed to analyze image with Gemini AI",
+        details: err.toString()
+      });
+    }
+  });
+
+  // CLOUD SQL & GOOGLE TASKS PERSISTENCE API ROUTES
+
+  // Sync / Register user in Cloud SQL
+  app.post("/api/db/sync-user", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+      const userRecord = await getOrCreateUser(req.user.uid, req.user.email || "", req.user.name || "");
+      res.json({ user: userRecord });
+    } catch (err: any) {
+      console.error("[Cloud SQL Sync User Error]:", err);
+      res.status(500).json({ error: err.message || "Failed to sync user to Cloud SQL" });
+    }
+  });
+
+  // Get task items from Cloud SQL
+  app.get("/api/db/tasks", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+      const userRecord = await getOrCreateUser(req.user.uid, req.user.email || "", req.user.name || "");
+      const tasks = await getUserTaskItems(userRecord.id);
+      res.json({ tasks });
+    } catch (err: any) {
+      console.error("[Cloud SQL Get Tasks Error]:", err);
+      res.status(500).json({ error: err.message || "Failed to fetch tasks from Cloud SQL" });
+    }
+  });
+
+  // Upsert task item in Cloud SQL
+  app.post("/api/db/tasks/upsert", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+      const userRecord = await getOrCreateUser(req.user.uid, req.user.email || "", req.user.name || "");
+      const { googleTaskId, tasklistId, title, notes, status, dueDate } = req.body;
+      const task = await upsertTaskItem({
+        userId: userRecord.id,
+        googleTaskId,
+        tasklistId,
+        title,
+        notes,
+        status,
+        dueDate,
+      });
+      res.json({ task });
+    } catch (err: any) {
+      console.error("[Cloud SQL Upsert Task Error]:", err);
+      res.status(500).json({ error: err.message || "Failed to upsert task in Cloud SQL" });
+    }
+  });
+
+  // Delete task item in Cloud SQL
+  app.delete("/api/db/tasks/delete", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+      const userRecord = await getOrCreateUser(req.user.uid, req.user.email || "", req.user.name || "");
+      const { googleTaskId } = req.body;
+      if (!googleTaskId) return res.status(400).json({ error: "googleTaskId required" });
+      await deleteTaskItemByGoogleId(userRecord.id, googleTaskId);
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("[Cloud SQL Delete Task Error]:", err);
+      res.status(500).json({ error: err.message || "Failed to delete task from Cloud SQL" });
+    }
+  });
+
+  // Get user study data from Cloud SQL
+  app.get("/api/db/study-data", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+      const userRecord = await getOrCreateUser(req.user.uid, req.user.email || "", req.user.name || "");
+      const studyData = await getUserStudyData(userRecord.id);
+      res.json({ studyData });
+    } catch (err: any) {
+      console.error("[Cloud SQL Get Study Data Error]:", err);
+      res.status(500).json({ error: err.message || "Failed to fetch study data from Cloud SQL" });
+    }
+  });
+
+  // Save user study data to Cloud SQL
+  app.post("/api/db/study-data", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+      const userRecord = await getOrCreateUser(req.user.uid, req.user.email || "", req.user.name || "");
+      const { configJson, testAnalyticsJson, mistakeVaultJson, focusSessionsJson } = req.body;
+      const saved = await saveUserStudyData(userRecord.id, {
+        configJson,
+        testAnalyticsJson,
+        mistakeVaultJson,
+        focusSessionsJson,
+      });
+      res.json({ studyData: saved });
+    } catch (err: any) {
+      console.error("[Cloud SQL Save Study Data Error]:", err);
+      res.status(500).json({ error: err.message || "Failed to save study data to Cloud SQL" });
     }
   });
 

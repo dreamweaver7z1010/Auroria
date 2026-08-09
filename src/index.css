@@ -96,12 +96,290 @@
   box-shadow: 0 0 15px rgba(255, 0, 85, 0.15);
 }
 
+/* Theme Variables & Styles */
+:root, [data-theme="taisho-nichirin"] {
+  --bg-primary: #0B2B1B;
+  --bg-secondary: #0D1F17;
+  --bg-card: #11181C;
+  --border-color: rgba(255, 42, 133, 0.35);
+  --text-primary: #FFF0F5;
+  --text-muted: #A3B8B0;
+  --accent-color: #FF2A85;
+  --accent-bg: rgba(255, 42, 133, 0.15);
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="gotham-noir"] {
+  --bg-primary: #0B0C0E;
+  --bg-secondary: #121418;
+  --bg-card: #161A1D;
+  --border-color: rgba(255, 215, 0, 0.4);
+  --text-primary: #F8FAFC;
+  --text-muted: #8E9BAE;
+  --accent-color: #FFD700;
+  --accent-bg: rgba(255, 215, 0, 0.15);
+  --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+
+
+[data-theme="brooklyn-graffiti"] {
+  --bg-primary: #0A0A0F;
+  --bg-secondary: #0F0F1A;
+  --bg-card: #12121D;
+  --border-color: rgba(255, 0, 127, 0.45);
+  --text-primary: #FAFAFA;
+  --text-muted: #94A3B8;
+  --accent-color: #FF007F;
+  --accent-bg: rgba(255, 0, 127, 0.2);
+  --card-shadow: 4px 4px 0px rgba(0, 240, 255, 0.3);
+}
+
+[data-theme="cursed-energy"] {
+  --bg-primary: #040914;
+  --bg-secondary: #070D1E;
+  --bg-card: #0A0D14;
+  --border-color: rgba(0, 210, 255, 0.4);
+  --text-primary: #F8FAFC;
+  --text-muted: #8292B4;
+  --accent-color: #00D2FF;
+  --accent-bg: rgba(0, 210, 255, 0.15);
+  --card-shadow: 0 0 25px rgba(0, 210, 255, 0.15);
+}
+
+[data-theme="borahae-galaxy"] {
+  --bg-primary: #170B2C;
+  --bg-secondary: #1D0F38;
+  --bg-card: #231242;
+  --border-color: rgba(192, 132, 252, 0.4);
+  --text-primary: #FAF5FF;
+  --text-muted: #A892C6;
+  --accent-color: #C084FC;
+  --accent-bg: rgba(192, 132, 252, 0.18);
+  --card-shadow: 0 8px 32px rgba(192, 132, 252, 0.15);
+}
+
+[data-theme="pink-venom"] {
+  --bg-primary: #000000;
+  --bg-secondary: #080808;
+  --bg-card: #0D0D0D;
+  --border-color: rgba(255, 20, 147, 0.45);
+  --text-primary: #FFFFFF;
+  --text-muted: #A1A1AA;
+  --accent-color: #FF1493;
+  --accent-bg: rgba(255, 20, 147, 0.2);
+  --card-shadow: 0 10px 30px rgba(255, 20, 147, 0.2);
+}
+
+
+[data-theme="fearless-anti-fragile"] {
+  --bg-primary: #18181B;
+  --bg-secondary: #202024;
+  --bg-card: #27272A;
+  --border-color: rgba(255, 85, 0, 0.45);
+  --text-primary: #FAFAFA;
+  --text-muted: #A1A1AA;
+  --accent-color: #FF5500;
+  --accent-bg: rgba(255, 85, 0, 0.2);
+  --card-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="assembly-initiative"] {
+  --bg-primary: #0B132B;
+  --bg-secondary: #121C3B;
+  --bg-card: #1C2541;
+  --border-color: rgba(0, 240, 255, 0.4);
+  --text-primary: #F1F5F9;
+  --text-muted: #8D99AE;
+  --accent-color: #00F0FF;
+  --accent-bg: rgba(0, 240, 255, 0.18);
+  --card-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+}
+
+
+
+[data-theme="power-your-dreams"] {
+  --bg-primary: #050505;
+  --bg-secondary: #0A0A0A;
+  --bg-card: #121212;
+  --border-color: rgba(16, 124, 65, 0.5);
+  --text-primary: #FAFAFA;
+  --text-muted: #8E8E93;
+  --accent-color: #107C41;
+  --accent-bg: rgba(16, 124, 65, 0.25);
+  --card-shadow: 0 0 25px rgba(16, 124, 65, 0.2);
+}
+
 body {
-  background-color: #0A0A0F;
-  color: #E2E8F0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   font-family: var(--font-sans);
   overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
+
+::selection {
+  background-color: var(--accent-bg);
+  color: var(--text-primary);
+}
+
+/* Dynamic Cards & Containers Across All Themes */
+.bg-\[\#12121A\],
+.bg-\[\#12121A\]\/80,
+.bg-\[\#0A0A0F\],
+.bg-\[\#07070F\],
+.bg-\[\#06060A\],
+.bg-\[\#11181C\],
+.bg-\[\#161A1D\],
+.bg-\[\#19142A\],
+.bg-\[\#12121D\],
+.bg-\[\#0A0D14\],
+.bg-\[\#231242\],
+.bg-\[\#0D0D0D\],
+.bg-\[\#161118\],
+.bg-\[\#27272A\],
+.bg-\[\#1C2541\],
+.bg-\[\#18181B\],
+.bg-\[\#121824\],
+.bg-\[\#121212\] {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+/* Global Border Override */
+.border-white\/10,
+.border-white\/5,
+.border-white\/15,
+.border-white\/20,
+.border-slate-800,
+.border-slate-700 {
+  border-color: var(--border-color) !important;
+}
+
+/* Accent Colors & Badges */
+.text-\[\#00F0FF\] {
+  color: var(--accent-color) !important;
+}
+
+.bg-\[\#00F0FF\]\/10,
+.bg-\[\#00F0FF\]\/15,
+.bg-\[\#00F0FF\]\/20 {
+  background-color: var(--accent-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Form Inputs, Selects & Textareas */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+textarea,
+select {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent-color) !important;
+  outline: 2px solid var(--accent-color) !important;
+}
+
+/* Custom Checkboxes according to Theme */
+input[type="checkbox"] {
+  accent-color: var(--accent-color) !important;
+}
+
+/* ⚔️ TAISHO NICHIRIN SPECIFIC STYLING */
+[data-theme="taisho-nichirin"] button:hover {
+  box-shadow: 0 0 12px rgba(255, 42, 133, 0.4) !important;
+}
+[data-theme="taisho-nichirin"] .border-purple-500\/30 {
+  border-color: #FF2A85 !important;
+}
+
+/* 🦇 GOTHAM NOIR SPECIFIC STYLING */
+[data-theme="gotham-noir"] button,
+[data-theme="gotham-noir"] div.rounded-xl,
+[data-theme="gotham-noir"] div.rounded-2xl {
+  border-radius: 4px !important;
+}
+[data-theme="gotham-noir"] button {
+  border-color: #FFD700 !important;
+}
+[data-theme="gotham-noir"] button:hover {
+  background-color: rgba(255, 215, 0, 0.2) !important;
+  color: #FFD700 !important;
+}
+
+
+/* 🕷️ BROOKLYN GRAFFITI SPECIFIC STYLING */
+[data-theme="brooklyn-graffiti"] button {
+  box-shadow: 3px 3px 0px #00F0FF !important;
+  transform: rotate(-0.5deg);
+}
+[data-theme="brooklyn-graffiti"] button:hover {
+  transform: rotate(0.5deg) scale(1.02);
+  box-shadow: 4px 4px 0px #FF007F !important;
+}
+
+/* 🔮 CURSED ENERGY SPECIFIC STYLING */
+[data-theme="cursed-energy"] button:hover {
+  box-shadow: 0 0 18px rgba(0, 210, 255, 0.6) !important;
+}
+
+/* 💜 BORAHAE GALAXY SPECIFIC STYLING */
+[data-theme="borahae-galaxy"] button,
+[data-theme="borahae-galaxy"] div.rounded-xl,
+[data-theme="borahae-galaxy"] div.rounded-2xl {
+  border-radius: 16px !important;
+}
+[data-theme="borahae-galaxy"] button:hover {
+  box-shadow: 0 0 20px rgba(192, 132, 252, 0.4) !important;
+}
+
+/* 🖤 PINK VENOM SPECIFIC STYLING */
+[data-theme="pink-venom"] button {
+  border: 1.5px solid #FF1493 !important;
+  color: #FFFFFF !important;
+}
+[data-theme="pink-venom"] button:hover {
+  background-color: #FF1493 !important;
+  color: #000000 !important;
+  font-weight: 900 !important;
+}
+
+
+/* 🏎️ FEARLESS ANTI-FRAGILE SPECIFIC STYLING */
+[data-theme="fearless-anti-fragile"] button,
+[data-theme="fearless-anti-fragile"] div {
+  border-radius: 2px !important;
+}
+[data-theme="fearless-anti-fragile"] button {
+  border-color: #FF5500 !important;
+}
+
+/* 🛡️ ASSEMBLY INITIATIVE SPECIFIC STYLING */
+[data-theme="assembly-initiative"] button:hover {
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.5) !important;
+}
+
+
+
+/* 🟩 POWER YOUR DREAMS SPECIFIC STYLING */
+[data-theme="power-your-dreams"] button {
+  border-color: #107C41 !important;
+  color: #FAFAFA !important;
+}
+[data-theme="power-your-dreams"] button:hover {
+  background-color: #107C41 !important;
+  box-shadow: 0 0 18px rgba(16, 124, 65, 0.6) !important;
+}
+
 
 /* Scrollbar customization */
 ::-webkit-scrollbar {

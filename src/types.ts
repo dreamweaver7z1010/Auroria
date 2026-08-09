@@ -91,12 +91,21 @@ export interface SyllabusGroup {
 
 export interface OnboardingConfig {
   board: "CBSE" | "CIE";
-  subVariant: "IGCSE" | "AS LEVEL" | "A LEVEL" | "AS/A LEVELS" | "9th Grade" | "10th Grade" | "11th Grade" | "12th Grade" | string;
+  subVariant: "AS LEVEL" | "A LEVEL" | "AS & A LEVEL" | string;
   subjects: SubjectConfig[];
   schoolStartDate: string; // [D1]
   revisionStartDate: string; // [D2]
   boardExamDate: string; // [D3]
-  customSyllabus?: Record<string, { name: string; topics: string[] }[]>;
+  customSyllabus?: Record<string, any>;
+}
+
+export interface FocusSession {
+  id: string;
+  subject: SubjectId;
+  durationMinutes: number;
+  completedAt: string;
+  notes?: string;
+  preset: "25m" | "50m" | "15m" | "90m" | "custom" | string;
 }
 
 export interface UserAccount {
@@ -105,6 +114,7 @@ export interface UserAccount {
   config: OnboardingConfig | null;
   testAnalytics: TestAnalytics[];
   mistakeVault: MistakeVault[];
+  focusSessions?: FocusSession[];
   currentOverrideState: number | null;
 }
 

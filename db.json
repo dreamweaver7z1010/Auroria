@@ -1,0 +1,737 @@
+{
+  "users": {
+    "guest": {
+      "username": "guest",
+      "salt": "35291aec529e615747e98c9cbcd251e8",
+      "passwordHash": "81b730f2186f80360c088a19054c0e743e7f6aacfc05364d8030026caaadac8c6d9e166b19bae99fdf32563f2c32a4f46523c0b259f7476f3474556922b2827f",
+      "onboarded": true,
+      "currentOverrideState": null,
+      "config": {
+        "board": "CIE",
+        "subVariant": "AS/A LEVELS",
+        "schoolStartDate": "2026-06-01",
+        "revisionStartDate": "2026-10-01",
+        "boardExamDate": "2026-11-20",
+        "subjects": [
+          {
+            "name": "Chemistry",
+            "components": [
+              {
+                "name": "Paper 1 (MCQ)",
+                "maxMarks": 40
+              },
+              {
+                "name": "Paper 2 (AS Structured)",
+                "maxMarks": 60
+              },
+              {
+                "name": "Paper 3 (Practical)",
+                "maxMarks": 40
+              }
+            ],
+            "totalMark": 140,
+            "totalPaperTarget": 30,
+            "yearRangeStart": 2022,
+            "yearRangeEnd": 2026,
+            "series": [
+              "Feb/March",
+              "May/June",
+              "Oct/Nov"
+            ],
+            "chronologicalRule": [
+              2025,
+              2026,
+              2024
+            ],
+            "componentSequence": [
+              "Paper 1 (MCQ)",
+              "Paper 2 (AS Structured)",
+              "Paper 3 (Practical)"
+            ],
+            "completedTopics": [
+              "Atoms, molecules, and stoichiometry"
+            ]
+          },
+          {
+            "name": "Physics",
+            "components": [
+              {
+                "name": "Paper 1 (MCQ)",
+                "maxMarks": 40
+              },
+              {
+                "name": "Paper 2 (AS Structured)",
+                "maxMarks": 60
+              },
+              {
+                "name": "Paper 3 (Practical)",
+                "maxMarks": 40
+              }
+            ],
+            "totalMark": 140,
+            "totalPaperTarget": 30,
+            "yearRangeStart": 2022,
+            "yearRangeEnd": 2026,
+            "series": [
+              "Feb/March",
+              "May/June",
+              "Oct/Nov"
+            ],
+            "chronologicalRule": [
+              2025,
+              2026,
+              2024
+            ],
+            "componentSequence": [
+              "Paper 1 (MCQ)",
+              "Paper 2 (AS Structured)",
+              "Paper 3 (Practical)"
+            ],
+            "completedTopics": []
+          },
+          {
+            "name": "Computer Science",
+            "components": [
+              {
+                "name": "Paper 1 (Theory Fundamentals)",
+                "maxMarks": 75
+              },
+              {
+                "name": "Paper 2 (Programming & Logic)",
+                "maxMarks": 75
+              }
+            ],
+            "totalMark": 150,
+            "totalPaperTarget": 30,
+            "yearRangeStart": 2022,
+            "yearRangeEnd": 2026,
+            "series": [
+              "May/June",
+              "Oct/Nov"
+            ],
+            "chronologicalRule": [
+              2025,
+              2026,
+              2024
+            ],
+            "componentSequence": [
+              "Paper 1 (Theory Fundamentals)",
+              "Paper 2 (Programming & Logic)"
+            ],
+            "completedTopics": [
+              "Information representation"
+            ]
+          },
+          {
+            "name": "Math",
+            "components": [
+              {
+                "name": "Paper 1 (Pure Mathematics 1)",
+                "maxMarks": 75
+              },
+              {
+                "name": "Paper 5 (Probability & Statistics 1)",
+                "maxMarks": 50
+              },
+              {
+                "name": "Paper 4 (Mechanics 1)",
+                "maxMarks": 50
+              }
+            ],
+            "totalMark": 175,
+            "totalPaperTarget": 35,
+            "yearRangeStart": 2022,
+            "yearRangeEnd": 2026,
+            "series": [
+              "Feb/March",
+              "May/June",
+              "Oct/Nov"
+            ],
+            "chronologicalRule": [
+              2025,
+              2026,
+              2024
+            ],
+            "componentSequence": [
+              "Paper 1 (Pure Mathematics 1)",
+              "Paper 5 (Probability & Statistics 1)",
+              "Paper 4 (Mechanics 1)"
+            ],
+            "completedTopics": [
+              "Quadratics"
+            ]
+          },
+          {
+            "name": "English",
+            "components": [
+              {
+                "name": "Paper 1 (Essay)",
+                "maxMarks": 50
+              },
+              {
+                "name": "Paper 2 (Comprehension)",
+                "maxMarks": 50
+              }
+            ],
+            "totalMark": 100,
+            "totalPaperTarget": 20,
+            "yearRangeStart": 2022,
+            "yearRangeEnd": 2026,
+            "series": [
+              "May/June",
+              "Oct/Nov"
+            ],
+            "chronologicalRule": [
+              2025,
+              2026,
+              2024
+            ],
+            "componentSequence": [
+              "Paper 1 (Essay)",
+              "Paper 2 (Comprehension)"
+            ],
+            "completedTopics": []
+          }
+        ]
+      },
+      "testAnalytics": [
+        {
+          "id": "test_1",
+          "name": "Computer Science Paper 1 - Past Paper 2025",
+          "classification": "Past Paper",
+          "rawScore": 68,
+          "totalMaxPoints": 75,
+          "percentage": 90.6,
+          "gritLog": "Flawless on OOP design and assembly logic. Lost some marks on Karnaugh map simplification state. Need to re-verify boolean expressions.",
+          "date": "2026-05-02"
+        },
+        {
+          "id": "test_2",
+          "name": "Chemistry Term Mock Unit 4",
+          "classification": "Mock",
+          "rawScore": 54,
+          "totalMaxPoints": 80,
+          "percentage": 67.5,
+          "gritLog": "CONCEPT GAP: Weak transient state concentration graphs. Miscalculated activation energy in Arrhenius plot. Action Plan: Drill chemical kinetics questions.",
+          "date": "2026-05-10"
+        },
+        {
+          "id": "test_3",
+          "name": "Maths Advanced Calculus - Monthly Test",
+          "classification": "Monthly",
+          "rawScore": 48,
+          "totalMaxPoints": 50,
+          "percentage": 96,
+          "gritLog": "Elite integration by parts. Perfectly optimized the bounded volume. Negligible arithmetic slip on decimal rounding on final proof.",
+          "date": "2026-05-14"
+        }
+      ],
+      "mistakeVault": [
+        {
+          "id": "m_1",
+          "subject": "Chemistry",
+          "description": "Arrhenius plot activation energy (Ea) sign calculation mixup.",
+          "wrongApproach": "ln(k) = - (Ea / R) * (1/T) + ln(A)\nSlope m was calculated as -2400 K\nm = Ea / R  ==>  Ea = -2400 * 8.314 = -19.9 kJ/mol\n[ERROR: Activation energy calculated as NEGATIVE. Physically impossible.]",
+          "correctedSequence": "Slope of Arrhenius plot is EQUAL TO -Ea / R\nm = -Ea / R  ==>  -2400 = -Ea / 8.314\nEa = 2400 * 8.314 = +19.95 kJ/mol\n[CORRECTED WORKFLOW: Activation energy must ALWAYS be positive for endothermic/exothermic barriers.]",
+          "resolved": false,
+          "dateAdded": "2026-05-10"
+        },
+        {
+          "id": "m_2",
+          "subject": "Computer Science",
+          "description": "Assembly branch pointer index offset alignment shift during array iteration.",
+          "wrongApproach": "LDR R0, [R1, #1]  ; Read next byte index\nADD R1, R1, #1   ; Linear increment byte array\n[ERROR: CPU is running on a word-designed addressing bus (4 bytes per word). Linear increment of #1 causes misalignment faults.]",
+          "correctedSequence": "LDR R0, [R1, #4]  ; Read next Word boundary\nADD R1, R1, #4   ; Increment address register by 4 bytes to align with 32-bit registers\n[CORRECTED WORKFLOW: Align word indexing offsets with architecture bit-widths.]",
+          "resolved": true,
+          "dateAdded": "2026-05-12"
+        }
+      ]
+    },
+    "candidate_cie": {
+      "username": "candidate_cie",
+      "name": "CIE Candidate",
+      "email": "candidate.cie@gmail.com",
+      "salt": "716ec1b32327b1c891a3fdfaffb19ab7",
+      "passwordHash": "9b0914ec0a4762f1ab0355f5d798e1900c7e850f8604d4548d090c657018e571a764fd7e10cba617f47268f768cf70243b5b217d66ddbbfb2f8a7340c8958061",
+      "onboarded": true,
+      "config": {
+        "board": "CIE",
+        "subVariant": "AS LEVEL",
+        "subjects": [
+          {
+            "name": "Physics (9702)",
+            "components": [
+              {
+                "name": "Paper 1: Multiple Choice",
+                "maxMarks": 40
+              },
+              {
+                "name": "Paper 2: AS Level Structured Questions",
+                "maxMarks": 60
+              },
+              {
+                "name": "Paper 3: Advanced Practical Skills",
+                "maxMarks": 40
+              }
+            ],
+            "totalMark": 140,
+            "totalPaperTarget": 30,
+            "yearRangeStart": 2022,
+            "yearRangeEnd": 2026,
+            "series": [
+              "Feb/March",
+              "May/June",
+              "Oct/Nov"
+            ],
+            "chronologicalRule": [
+              2025,
+              2026,
+              2024
+            ],
+            "componentSequence": [
+              "Paper 1: Multiple Choice",
+              "Paper 2: AS Level Structured Questions",
+              "Paper 3: Advanced Practical Skills"
+            ],
+            "completedTopics": [],
+            "completedTopics_phase1": [
+              "Physical quantities & units",
+              "Kinematics",
+              "Dynamics",
+              "Forces, density and pressure",
+              "Work, energy, power",
+              "Deformation of solids",
+              "Waves",
+              "Superposition",
+              "Current electricity",
+              "D.C. circuits",
+              "Particle physics & nuclear structure"
+            ]
+          },
+          {
+            "name": "Mathematics (9709)",
+            "components": [
+              {
+                "name": "Paper 1: Pure Mathematics 1",
+                "maxMarks": 75
+              },
+              {
+                "name": "Paper 5: Probability & Statistics 1",
+                "maxMarks": 50
+              }
+            ],
+            "totalMark": 125,
+            "totalPaperTarget": 35,
+            "yearRangeStart": 2022,
+            "yearRangeEnd": 2026,
+            "series": [
+              "Feb/March",
+              "May/June",
+              "Oct/Nov"
+            ],
+            "chronologicalRule": [
+              2025,
+              2026,
+              2024
+            ],
+            "componentSequence": [
+              "Paper 1: Pure Mathematics 1",
+              "Paper 5: Probability & Statistics 1"
+            ],
+            "completedTopics": [],
+            "completedTopics_phase1": [
+              "Quadratics",
+              "Functions",
+              "Coordinate geometry",
+              "Circular measure",
+              "Trigonometry",
+              "Series",
+              "Representation of data",
+              "Permutations & combinations",
+              "Probability",
+              "Discrete random variables",
+              "Normal distribution",
+              "Differentiation",
+              "Integration"
+            ]
+          },
+          {
+            "name": "Chemistry (9701)",
+            "components": [
+              {
+                "name": "Paper 1: Multiple Choice",
+                "maxMarks": 40
+              },
+              {
+                "name": "Paper 2: AS Level Structured Questions",
+                "maxMarks": 60
+              },
+              {
+                "name": "Paper 3: Advanced Practical Skills",
+                "maxMarks": 40
+              }
+            ],
+            "totalMark": 140,
+            "totalPaperTarget": 30,
+            "yearRangeStart": 2022,
+            "yearRangeEnd": 2026,
+            "series": [
+              "Feb/March",
+              "May/June",
+              "Oct/Nov"
+            ],
+            "chronologicalRule": [
+              2025,
+              2026,
+              2024
+            ],
+            "componentSequence": [
+              "Paper 1: Multiple Choice",
+              "Paper 2: AS Level Structured Questions",
+              "Paper 3: Advanced Practical Skills"
+            ],
+            "completedTopics": [],
+            "completedTopics_phase1": [
+              "Atoms, molecules & stoichiometry",
+              "Atomic structure",
+              "Chemical bonding",
+              "States of matter",
+              "Chemical energetics",
+              "Electrochemistry",
+              "Equilibria",
+              "Reaction kinetics",
+              "The Periodic Table",
+              "Group 2",
+              "Group 17",
+              "Nitrogen and sulfur",
+              "Organic chemistry intro",
+              "Hydrocarbons",
+              "Halogenoalkanes",
+              "Alcohols",
+              "Carbonyl compounds",
+              "Carboxylic acids"
+            ]
+          },
+          {
+            "name": "Computer Science (9618)",
+            "components": [
+              {
+                "name": "Paper 1: Theory Fundamentals",
+                "maxMarks": 75
+              },
+              {
+                "name": "Paper 2: Fundamental Problem-solving and Programming Skills",
+                "maxMarks": 75
+              }
+            ],
+            "totalMark": 150,
+            "totalPaperTarget": 30,
+            "yearRangeStart": 2022,
+            "yearRangeEnd": 2026,
+            "series": [
+              "May/June",
+              "Oct/Nov"
+            ],
+            "chronologicalRule": [
+              2025,
+              2026,
+              2024
+            ],
+            "componentSequence": [
+              "Paper 1: Theory Fundamentals",
+              "Paper 2: Fundamental Problem-solving and Programming Skills"
+            ],
+            "completedTopics": [],
+            "completedTopics_phase1": [
+              "Information representation",
+              "Communication & web",
+              "Hardware",
+              "Processor fundamentals",
+              "System software",
+              "Security",
+              "Ethics",
+              "Algorithm design",
+              "Data structures",
+              "Programming concepts",
+              "Software engineering models"
+            ]
+          },
+          {
+            "name": "English General Paper (8021)",
+            "components": [
+              {
+                "name": "Paper 1: Essay",
+                "maxMarks": 50
+              },
+              {
+                "name": "Paper 2: Comprehension",
+                "maxMarks": 50
+              }
+            ],
+            "totalMark": 100,
+            "totalPaperTarget": 20,
+            "yearRangeStart": 2022,
+            "yearRangeEnd": 2026,
+            "series": [
+              "May/June",
+              "Oct/Nov"
+            ],
+            "chronologicalRule": [
+              2025,
+              2026,
+              2024
+            ],
+            "componentSequence": [
+              "Paper 1: Essay",
+              "Paper 2: Comprehension"
+            ],
+            "completedTopics": [],
+            "completedTopics_phase1": [
+              "Deconstructing questions",
+              "Essay structuring",
+              "Developing examples",
+              "Style & persuasive tone",
+              "Analyzing texts",
+              "Interpreting written data",
+              "Linguistic devices",
+              "Summary writing rules"
+            ]
+          }
+        ],
+        "schoolStartDate": "2026-06-01",
+        "revisionStartDate": "2026-10-01",
+        "boardExamDate": "2026-11-20",
+        "customSyllabus": {
+          "Physics (9702)": {
+            "groupA": {
+              "name": "Physical Quantities & Mechanics",
+              "topics": [
+                "Physical quantities & units",
+                "Kinematics",
+                "Dynamics",
+                "Forces, density and pressure",
+                "Work, energy, power",
+                "Deformation of solids"
+              ]
+            },
+            "groupB": {
+              "name": "Waves, Electricity & Nuclear",
+              "topics": [
+                "Waves",
+                "Superposition",
+                "Current electricity",
+                "D.C. circuits",
+                "Particle physics & nuclear structure"
+              ]
+            }
+          },
+          "Mathematics (9709)": {
+            "groupA": {
+              "name": "Pure Mathematics 1 (P1)",
+              "topics": [
+                "Quadratics",
+                "Functions",
+                "Coordinate geometry",
+                "Circular measure",
+                "Trigonometry",
+                "Series",
+                "Differentiation",
+                "Integration"
+              ]
+            },
+            "groupB": {
+              "name": "Probability & Statistics 1 (S1)",
+              "topics": [
+                "Representation of data",
+                "Permutations & combinations",
+                "Probability",
+                "Discrete random variables",
+                "Normal distribution"
+              ]
+            }
+          },
+          "Chemistry (9701)": {
+            "groupA": {
+              "name": "Physical Chemistry Foundations",
+              "topics": [
+                "Atoms, molecules & stoichiometry",
+                "Atomic structure",
+                "Chemical bonding",
+                "States of matter",
+                "Chemical energetics",
+                "Electrochemistry",
+                "Equilibria",
+                "Reaction kinetics"
+              ]
+            },
+            "groupB": {
+              "name": "Inorganic & Organic Chemistry",
+              "topics": [
+                "The Periodic Table",
+                "Group 2",
+                "Group 17",
+                "Nitrogen and sulfur",
+                "Organic chemistry intro",
+                "Hydrocarbons",
+                "Halogenoalkanes",
+                "Alcohols",
+                "Carbonyl compounds",
+                "Carboxylic acids"
+              ]
+            }
+          },
+          "Biology (9700)": {
+            "groupA": {
+              "name": "Cell Structure & Biochemistry",
+              "topics": [
+                "Cell structure and design",
+                "Biological molecules",
+                "Enzymes",
+                "Cell membranes and transport",
+                "Mitotic cell cycle",
+                "Nucleic acids & protein synthesis"
+              ]
+            },
+            "groupB": {
+              "name": "Physiology & Pathogens",
+              "topics": [
+                "Transport in plants",
+                "Transport in mammals",
+                "Gas exchange and smoking",
+                "Infectious diseases",
+                "Immunity mechanisms"
+              ]
+            }
+          },
+          "Computer Science (9618)": {
+            "groupA": {
+              "name": "Theory Fundamentals",
+              "topics": [
+                "Information representation",
+                "Communication & web",
+                "Hardware",
+                "Processor fundamentals",
+                "System software",
+                "Security",
+                "Ethics"
+              ]
+            },
+            "groupB": {
+              "name": "Fundamental Problem-solving & Coding",
+              "topics": [
+                "Algorithm design",
+                "Data structures",
+                "Programming concepts",
+                "Software engineering models"
+              ]
+            }
+          },
+          "English General Paper (8021)": {
+            "groupA": {
+              "name": "Core Essay Construction",
+              "topics": [
+                "Deconstructing questions",
+                "Essay structuring",
+                "Developing examples",
+                "Style & persuasive tone"
+              ]
+            },
+            "groupB": {
+              "name": "Comprehension & Analysis",
+              "topics": [
+                "Analyzing texts",
+                "Interpreting written data",
+                "Linguistic devices",
+                "Summary writing rules"
+              ]
+            }
+          },
+          "Accounting (9706)": {
+            "groupA": {
+              "name": "Fundamentals of Financial Accounting",
+              "topics": [
+                "Double-entry systems",
+                "Verification controls",
+                "Sole trader statements",
+                "Partnership accounts"
+              ]
+            },
+            "groupB": {
+              "name": "Fundamentals of Cost Accounting",
+              "topics": [
+                "Material cost & logistics",
+                "Labor cost strategies",
+                "Absorption costing",
+                "Marginal costing rules"
+              ]
+            }
+          },
+          "Economics (9708)": {
+            "groupA": {
+              "name": "Microeconomic Fundamentals",
+              "topics": [
+                "Basic economic ideas",
+                "Demand & supply",
+                "Market equilibrium",
+                "Price elasticity"
+              ]
+            },
+            "groupB": {
+              "name": "Macroeconomic Policy",
+              "topics": [
+                "Aggregate demand & supply",
+                "Economic integration",
+                "Balance of payments",
+                "Inflation indices"
+              ]
+            }
+          },
+          "Business (9609)": {
+            "groupA": {
+              "name": "Business Activity & People",
+              "topics": [
+                "Business and its environment",
+                "People in business",
+                "Marketing paradigms"
+              ]
+            },
+            "groupB": {
+              "name": "Operations & Finance Concepts",
+              "topics": [
+                "Operations management",
+                "Finance and accounting",
+                "Budgets and cashflows"
+              ]
+            }
+          },
+          "Psychology (9990)": {
+            "groupA": {
+              "name": "Core Biological & Cognitive Studies",
+              "topics": [
+                "Biological approach in social settings",
+                "Cognitive memory sweeps",
+                "Learning approach models"
+              ]
+            },
+            "groupB": {
+              "name": "Research Methodology",
+              "topics": [
+                "Experimental designs",
+                "Self-reports & surveys",
+                "Case study approaches",
+                "Ethics guidelines"
+              ]
+            }
+          }
+        }
+      },
+      "testAnalytics": [],
+      "mistakeVault": [],
+      "userResources": [],
+      "currentOverrideState": null
+    }
+  },
+  "tokens": {
+    "47e282f4a765429c2ec1586358d65d97e8e7956847cb403035365f884ee630a5": "candidate_cie"
+  }
+}

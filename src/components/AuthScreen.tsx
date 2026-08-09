@@ -117,7 +117,105 @@ export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
     }
   };
 
-  // Helper mode: guest student playground setup
+  // Forgot Password States
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [forgotInput, setForgotInput] = useState("");
+  const [resetTokenReceived, setResetTokenReceived] = useState<string | null>(null);
+  const [resetTargetUser, setResetTargetUser] = useState("");
+  const [newPasswordInput, setNewPasswordInput] = useState("");
+
+  // Google OAuth Verification Handler
+  const handleGoogleAuth = async () => {
+    setLoading(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      const res = await fetch("/api/auth/google-oauth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: "candidate.cie@gmail.com",
+          name: "CIE Candidate"
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Google OAuth authentication failed.");
+
+      setSuccessMsg("Google OAuth clearance granted! Redirecting to study portal...");
+      setTimeout(() => {
+        onLoginSuccess(data.token, data.user.username, data.user.onboarded);
+      }, 1000);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed Google OAuth verification.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Forgot Password Submit
+  const handleForgotPasswordSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!forgotInput.trim()) return;
+
+    setLoading(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usernameOrEmail: forgotInput.trim() })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "User identity not found.");
+
+      setSuccessMsg(data.message);
+      setResetTokenReceived(data.resetToken);
+      setResetTargetUser(data.username);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Password recovery failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Reset Password Submit
+  const handleResetPasswordSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!newPasswordInput) return;
+
+    setLoading(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: resetTargetUser,
+          newPassword: newPasswordInput
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed resetting password.");
+
+      setSuccessMsg(data.message);
+      setTimeout(() => {
+        setIsForgotPassword(false);
+        setResetTokenReceived(null);
+        setNewPasswordInput("");
+        setIsLogin(true);
+      }, 1500);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Reset failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleGuestLogin = async () => {
     setLoading(true);
     setErrorMsg(null);
@@ -264,7 +362,20 @@ export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
               </div>
 
               <div className="space-y-1 block text-left">
-                <label className="text-[9px] text-slate-500 block uppercase">Authorization Password</label>
+                <div className="flex justify-between items-center">
+                  <label className="text-[9px] text-slate-500 block uppercase">Authorization Password</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsForgotPassword(true);
+                      setErrorMsg(null);
+                      setSuccessMsg(null);
+                    }}
+                    className="text-[9px] text-[#00F0FF] hover:underline uppercase"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-2.5 text-slate-500" size={14} />
                   <input
@@ -285,7 +396,99 @@ export default function AuthScreen({ onLoginSuccess }: AuthScreenProps) {
               >
                 {loading ? "CHECKING PASSWORD STATUS..." : "LOAD PERSONAL ARCHIVE"}
               </button>
+
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-white/5"></div>
+                <span className="flex-shrink mx-2 text-[9px] text-slate-500 uppercase">OR OAUTH VERIFY</span>
+                <div className="flex-grow border-t border-white/5"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGoogleAuth}
+                disabled={loading}
+                className="w-full py-2.5 rounded font-extrabold uppercase text-[10px] transition-all tracking-widest border border-white/10 bg-white/5 hover:bg-white/10 text-slate-200 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Mail size={14} className="text-red-400" />
+                CONTINUE WITH GOOGLE / GMAIL
+              </button>
             </form>
+          ) : isForgotPassword ? (
+            /* FORGOT PASSWORD RECOVERY FORM */
+            <div className="space-y-4 text-left">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsForgotPassword(false);
+                  setResetTokenReceived(null);
+                  setErrorMsg(null);
+                  setSuccessMsg(null);
+                }}
+                className="text-[10px] text-slate-400 hover:text-slate-200 flex items-center gap-1 uppercase font-bold"
+              >
+                <ArrowLeft size={12} /> Back to Sign In
+              </button>
+
+              {!resetTokenReceived ? (
+                <form onSubmit={handleForgotPasswordSubmit} className="space-y-3">
+                  <div className="text-[10px] text-slate-400">
+                    Enter your registered candidate username or email address to initiate verification token recovery.
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[9px] text-slate-500 uppercase block">Username or Email</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-2.5 text-slate-500" size={14} />
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. deeksha_student"
+                        value={forgotInput}
+                        onChange={(e) => setForgotInput(e.target.value)}
+                        className="w-full bg-[#0A0A0F] border border-white/10 rounded p-2 pl-9 text-slate-200 focus:outline-none focus:border-[#00F0FF]"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-2.5 rounded font-black uppercase text-[10px] tracking-widest border cursor-pointer bg-[#00F0FF]/20 border-[#00F0FF]/60 text-[#00F0FF] hover:bg-[#00F0FF]/30"
+                  >
+                    {loading ? "VERIFYING IDENTITY..." : "REQUEST RECOVERY TOKEN"}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleResetPasswordSubmit} className="space-y-3">
+                  <div className="p-2 border border-[#00FF66]/30 bg-[#00FF66]/5 rounded text-[10px] text-[#00FF66]">
+                    Clearance token verified for student profile: <strong>{resetTargetUser}</strong>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[9px] text-slate-500 uppercase block">New Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-2.5 text-slate-500" size={14} />
+                      <input
+                        type="password"
+                        required
+                        placeholder="Enter new password..."
+                        value={newPasswordInput}
+                        onChange={(e) => setNewPasswordInput(e.target.value)}
+                        className="w-full bg-[#0A0A0F] border border-white/10 rounded p-2 pl-9 text-slate-200 focus:outline-none focus:border-[#00FF66]"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-2.5 rounded font-black uppercase text-[10px] tracking-widest border cursor-pointer bg-[#00FF66]/20 border-[#00FF66]/60 text-[#00FF66] hover:bg-[#00FF66]/30"
+                  >
+                    {loading ? "RESETTING PASSWORD..." : "UPDATE PASSWORD & DIRECT TO LOGIN"}
+                  </button>
+                </form>
+              )}
+            </div>
           ) : (
             /* SIGNUP FORM: NAME, USERNAME, PASSWORD, EMAIL, EMAIL'S PASSWORD (NO OTP) */
             <form onSubmit={handleSignupSubmit} className="space-y-3.5 text-left">
